@@ -138,6 +138,10 @@ export class Util {
           });
         }
       });
+
+      category.auditRefs.sort((a, b) => {
+        return b.weight - a.weight;
+      });
     }
 
     return clone;
