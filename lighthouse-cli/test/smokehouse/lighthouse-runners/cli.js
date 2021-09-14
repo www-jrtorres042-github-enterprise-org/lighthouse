@@ -12,16 +12,18 @@
  * them.
  */
 
-const fs = require('fs').promises;
-const os = require('os');
-const {promisify} = require('util');
-const execFileAsync = promisify(require('child_process').execFile);
+import {promises as fs} from 'fs';
+import {promisify} from 'util';
+import {execFile} from 'child_process';
 
-const log = require('lighthouse-logger');
+import log from 'lighthouse-logger';
 
-const assetSaver = require('../../../../lighthouse-core/lib/asset-saver.js');
-const LocalConsole = require('../lib/local-console.js');
-const ChildProcessError = require('../lib/child-process-error.js');
+import assetSaver from '../../../../lighthouse-core/lib/asset-saver.js';
+import {LocalConsole} from '../lib/local-console.js';
+import {ChildProcessError} from '../lib/child-process-error.js';
+import {LH_ROOT} from '../../../../root.js';
+
+const execFileAsync = promisify(execFile);
 
 /**
  * Launch Chrome and do a full Lighthouse run via the Lighthouse CLI.
@@ -31,9 +33,10 @@ const ChildProcessError = require('../lib/child-process-error.js');
  * @return {Promise<{lhr: LH.Result, artifacts: LH.Artifacts, log: string}>}
  */
 async function runLighthouse(url, configJson, testRunnerOptions = {}) {
-  const tmpPath = await fs.mkdtemp(`${os.tmpdir()}/smokehouse-`);
-
   const {isDebug} = testRunnerOptions;
+  const tmpDir = `${LH_ROOT}/.tmp/smokehouse`;
+  await fs.mkdir(tmpDir, {recursive: true});
+  const tmpPath = await fs.mkdtemp(`${tmpDir}/smokehouse-`);
   return internalRun(url, tmpPath, configJson, testRunnerOptions)
     // Wait for internalRun() before removing scratch directory.
     .finally(() => !isDebug && fs.rmdir(tmpPath, {recursive: true}));
@@ -69,7 +72,7 @@ async function internalRun(url, tmpPath, configJson, options) {
   const artifactsDirectory = `${tmpPath}/artifacts/`;
 
   const args = [
-    `${__dirname}/../../../index.js`, // 'lighthouse-cli/index.js'
+    `${LH_ROOT}/lighthouse-cli/index.js`,
     `${url}`,
     `--output-path=${outputPath}`,
     '--output=json',
@@ -142,6 +145,6 @@ async function internalRun(url, tmpPath, configJson, options) {
   };
 }
 
-module.exports = {
+export {
   runLighthouse,
 };

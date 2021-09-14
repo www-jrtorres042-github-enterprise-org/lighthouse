@@ -11,26 +11,37 @@
  * smoke tests passed.
  */
 
-const log = require('lighthouse-logger');
-const cliLighthouseRunner = require('./lighthouse-runners/cli.js').runLighthouse;
-const getAssertionReport = require('./report-assert.js');
-const LocalConsole = require('./lib/local-console.js');
-const ConcurrentMapper = require('./lib/concurrent-mapper.js');
-
 /* eslint-disable no-console */
 
-/** @typedef {import('./lib/child-process-error.js')} ChildProcessError */
+/** @typedef {import('./lib/child-process-error.js').ChildProcessError} ChildProcessError */
 
-// The number of concurrent (`!runSerially`) tests to run if `jobs` isn't set.
-const DEFAULT_CONCURRENT_RUNS = 5;
-const DEFAULT_RETRIES = 0;
+/**
+ * @typedef Run
+ * @property {string[] | undefined} networkRequests
+ * @property {LH.Result} lhr
+ * @property {LH.Artifacts} artifacts
+ * @property {string} lighthouseLog
+ * @property {string} assertionLog
+ */
 
 /**
  * @typedef SmokehouseResult
  * @property {string} id
  * @property {number} passed
  * @property {number} failed
+ * @property {Run[]} runs
  */
+
+import log from 'lighthouse-logger';
+
+import {runLighthouse as cliLighthouseRunner} from './lighthouse-runners/cli.js';
+import {getAssertionReport} from './report-assert.js';
+import {LocalConsole} from './lib/local-console.js';
+import {ConcurrentMapper} from './lib/concurrent-mapper.js';
+
+// The number of concurrent (`!runSerially`) tests to run if `jobs` isn't set.
+const DEFAULT_CONCURRENT_RUNS = 5;
+const DEFAULT_RETRIES = 0;
 
 /**
  * Runs the selected smoke tests. Returns whether all assertions pass.
@@ -120,6 +131,8 @@ async function runSmokeTest(smokeTestDefn, testOptions) {
   console.log(`${purpleify(id)} smoketest starting…`);
 
   // Rerun test until there's a passing result or retries are exhausted to prevent flakes.
+  /** @type {Run[]} */
+  const runs = [];
   let result;
   let report;
   const bufferedConsole = new LocalConsole();
@@ -145,6 +158,13 @@ async function runSmokeTest(smokeTestDefn, testOptions) {
 
     // Assert result.
     report = getAssertionReport(result, expectations, {isDebug});
+
+    runs.push({
+      ...result,
+      lighthouseLog: result.log,
+      assertionLog: report.log,
+    });
+
     if (report.failed) {
       bufferedConsole.log(`  ${getAssertionLog(report.failed)} failed.`);
       continue; // Retry, if possible.
@@ -180,6 +200,7 @@ async function runSmokeTest(smokeTestDefn, testOptions) {
     id,
     passed,
     failed,
+    runs,
   };
 }
 
@@ -206,6 +227,6 @@ function getAssertionLog(count) {
   return `${count} assertion${plural}`;
 }
 
-module.exports = {
+export {
   runSmokehouse,
 };

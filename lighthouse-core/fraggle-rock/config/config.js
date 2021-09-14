@@ -16,6 +16,7 @@ const {
   isValidArtifactDependency,
   throwInvalidArtifactDependency,
   assertArtifactTopologicalOrder,
+  assertValidConfig,
 } = require('./validation.js');
 const {filterConfigByGatherMode, filterConfigByExplicitFilters} = require('./filters.js');
 const {
@@ -23,10 +24,13 @@ const {
   resolveSettings,
   resolveAuditsToDefns,
   resolveGathererToDefn,
+  mergePlugins,
   mergeConfigFragment,
   mergeConfigFragmentArrayByKey,
 } = require('../../config/config-helpers.js');
 const defaultConfigPath = path.join(__dirname, './default-config.js');
+
+/** @typedef {Omit<LH.Config.FRContext, 'gatherMode'> & {gatherMode: LH.Gatherer.GatherMode}} ConfigContext */
 
 /**
  * @param {LH.Config.Json|undefined} configJSON
@@ -131,7 +135,7 @@ function resolveArtifactsToDefns(artifacts, configDir) {
   const coreGathererList = Runner.getGathererList();
   const artifactDefns = artifacts.map(artifactJson => {
     /** @type {LH.Config.GathererJson} */
-    // @ts-expect-error FR-COMPAT - eventually move the config-helpers to support new types
+    // @ts-expect-error - remove when legacy runner path is removed.
     const gathererJson = artifactJson.gatherer;
 
     const gatherer = resolveGathererToDefn(gathererJson, coreGathererList, configDir);
@@ -155,6 +159,20 @@ function resolveArtifactsToDefns(artifacts, configDir) {
 
   log.timeEnd(status);
   return artifactDefns;
+}
+
+/**
+ * Overrides the settings that may not apply to the chosen gather mode.
+ *
+ * @param {LH.Config.Settings} settings
+ * @param {ConfigContext} context
+ */
+function overrideSettingsForGatherMode(settings, context) {
+  if (context.gatherMode === 'timespan') {
+    if (settings.throttlingMethod === 'simulate') {
+      settings.throttlingMethod = 'devtools';
+    }
+  }
 }
 
 /**
@@ -223,7 +241,7 @@ function resolveNavigationsToDefns(navigations, artifactDefns, settings) {
 
 /**
  * @param {LH.Config.Json|undefined} configJSON
- * @param {Omit<LH.Config.FRContext, 'gatherMode'> & {gatherMode: LH.Gatherer.GatherMode}} context
+ * @param {ConfigContext} context
  * @return {{config: LH.Config.FRConfig, warnings: string[]}}
  */
 function initializeConfig(configJSON, context) {
@@ -233,10 +251,11 @@ function initializeConfig(configJSON, context) {
   let {configWorkingCopy, configDir} = resolveWorkingCopy(configJSON, context); // eslint-disable-line prefer-const
 
   configWorkingCopy = resolveExtensions(configWorkingCopy);
-
-  // TODO(FR-COMPAT): handle config plugins
+  configWorkingCopy = mergePlugins(configWorkingCopy, configDir, context.settingsOverrides);
 
   const settings = resolveSettings(configWorkingCopy.settings || {}, context.settingsOverrides);
+  overrideSettingsForGatherMode(settings, context);
+
   const artifacts = resolveArtifactsToDefns(configWorkingCopy.artifacts, configDir);
   const navigations = resolveNavigationsToDefns(configWorkingCopy.navigations, artifacts, settings);
 
@@ -250,15 +269,13 @@ function initializeConfig(configJSON, context) {
     settings,
   };
 
-  // TODO(FR-COMPAT): validate navigations
-  // TODO(FR-COMPAT): validate audits
-  // TODO(FR-COMPAT): validate categories
+  const {warnings} = assertValidConfig(config);
 
   config = filterConfigByGatherMode(config, context.gatherMode);
   config = filterConfigByExplicitFilters(config, settings);
 
   log.timeEnd(status);
-  return {config, warnings: []};
+  return {config, warnings};
 }
 
 module.exports = {resolveWorkingCopy, initializeConfig};

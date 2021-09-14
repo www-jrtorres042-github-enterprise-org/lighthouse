@@ -6,15 +6,16 @@
 
 import {Artifacts} from './artifacts';
 import Config from './config';
-import LHResult from './lhr';
+import LHResult from './lhr/lhr';
 
 declare global {
   module Smokehouse {
     interface ExpectedLHR {
       audits: Record<string, any>;
       requestedUrl: string;
-      finalUrl: string;
-      runWarnings?: Array<string|RegExp>;
+      finalUrl: string | RegExp;
+      userAgent?: string | RegExp;
+      runWarnings?: Array<string|RegExp> | {length: string | number};
       runtimeError?: {
         code?: any;
         message?: any;

@@ -47,10 +47,7 @@ const artifacts = {
   FontSize: '',
   FormElements: '',
   FullPageScreenshot: '',
-  GatherContext: '',
   GlobalListeners: '',
-  HostFormFactor: '',
-  HostUserAgent: '',
   IFrameElements: '',
   ImageElements: '',
   InstallabilityErrors: '',
@@ -85,8 +82,6 @@ for (const key of Object.keys(artifacts)) {
 const defaultConfig = {
   artifacts: [
     // Artifacts which can be depended on come first.
-    {id: artifacts.HostUserAgent, gatherer: 'host-user-agent'},
-    {id: artifacts.HostFormFactor, gatherer: 'host-form-factor'},
     {id: artifacts.DevtoolsLog, gatherer: 'devtools-log'},
     {id: artifacts.Trace, gatherer: 'trace'},
 
@@ -103,7 +98,6 @@ const defaultConfig = {
     {id: artifacts.FontSize, gatherer: 'seo/font-size'},
     {id: artifacts.FormElements, gatherer: 'form-elements'},
     {id: artifacts.FullPageScreenshot, gatherer: 'full-page-screenshot'},
-    {id: artifacts.GatherContext, gatherer: 'gather-context'},
     {id: artifacts.GlobalListeners, gatherer: 'global-listeners'},
     {id: artifacts.IFrameElements, gatherer: 'iframe-elements'},
     {id: artifacts.ImageElements, gatherer: 'image-elements'},
@@ -142,8 +136,6 @@ const defaultConfig = {
       cpuQuietThresholdMs: 1000,
       artifacts: [
         // Artifacts which can be depended on come first.
-        artifacts.HostUserAgent,
-        artifacts.HostFormFactor,
         artifacts.DevtoolsLog,
         artifacts.Trace,
 
@@ -158,7 +150,6 @@ const defaultConfig = {
         artifacts.EmbeddedContent,
         artifacts.FontSize,
         artifacts.FormElements,
-        artifacts.GatherContext,
         artifacts.GlobalListeners,
         artifacts.IFrameElements,
         artifacts.ImageElements,

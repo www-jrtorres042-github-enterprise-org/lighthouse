@@ -145,7 +145,7 @@ function saveLhr(lhr, basePath) {
 /**
  * Filter traces and extract screenshots to prepare for saving.
  * @param {LH.Artifacts} artifacts
- * @param {LH.Audit.Results} [audits]
+ * @param {LH.Result['audits']} [audits]
  * @return {Promise<Array<PreparedAssets>>}
  */
 async function prepareAssets(artifacts, audits) {
@@ -275,7 +275,7 @@ async function saveLanternDebugTraces(pathWithBasename) {
 /**
  * Writes trace(s) and associated asset(s) to disk.
  * @param {LH.Artifacts} artifacts
- * @param {LH.Audit.Results} audits
+ * @param {LH.Result['audits']} audits
  * @param {string} pathWithBasename
  * @return {Promise<void>}
  */

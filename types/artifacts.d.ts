@@ -14,9 +14,11 @@ import ArbitraryEqualityMap = require('../lighthouse-core/lib/arbitrary-equality
 
 type _TaskNode = import('../lighthouse-core/lib/tracehouse/main-thread-tasks.js').TaskNode;
 
+import AuditDetails from './lhr/audit-details'
 import Config from './config';
 import Gatherer from './gatherer';
-import {IcuMessage} from './i18n';
+import {IcuMessage} from './lhr/i18n';
+import LHResult from './lhr/lhr'
 import Protocol from './protocol';
 
 export interface Artifacts extends BaseArtifacts, GathererArtifacts {}
@@ -52,6 +54,12 @@ interface UniversalBaseArtifacts {
   settings: Config.Settings;
   /** The timing instrumentation of the gather portion of a run. */
   Timing: Artifacts.MeasureEntry[];
+  /** Device which Chrome is running on. */
+  HostFormFactor: 'desktop'|'mobile';
+  /** The user agent string of the version of Chrome used. */
+  HostUserAgent: string;
+  /** Information about how Lighthouse artifacts were gathered. */
+  GatherContext: {gatherMode: Gatherer.GatherMode};
 }
 
 /**
@@ -68,10 +76,6 @@ interface ContextualBaseArtifacts {
  * The set of base artifacts that were replaced by standard gatherers in Fraggle Rock.
  */
 interface LegacyBaseArtifacts {
-  /** Device which Chrome is running on. */
-  HostFormFactor: 'desktop'|'mobile';
-  /** The user agent string of the version of Chrome used. */
-  HostUserAgent: string;
   /** The user agent string that Lighthouse used to load the page. Set to the empty string if unknown. */
   NetworkUserAgent: string;
   /** Information on detected tech stacks (e.g. JS libraries) used by the page. */
@@ -142,8 +146,6 @@ export interface GathererArtifacts extends PublicGathererArtifacts,LegacyBaseArt
   FormElements: Artifacts.Form[];
   /** Screenshot of the entire page (rather than just the above the fold content). */
   FullPageScreenshot: Artifacts.FullPageScreenshot | null;
-  /** Information about how Lighthouse artifacts were gathered. */
-  GatherContext: {gatherMode: Gatherer.GatherMode};
   /** Information about event listeners registered on the global object. */
   GlobalListeners: Array<Artifacts.GlobalListener>;
   /** Whether the page ended up on an HTTPS page after attempting to load the HTTP version. */
@@ -163,7 +165,7 @@ export interface GathererArtifacts extends PublicGathererArtifacts,LegacyBaseArt
   /** Size info of all network records sent without compression and their size after gzipping. */
   ResponseCompression: {requestId: string, url: string, mimeType: string, transferSize: number, resourceSize: number, gzipSize?: number}[];
   /** Information on fetching and the content of the /robots.txt file. */
-  RobotsTxt: {status: number|null, content: string|null};
+  RobotsTxt: {status: number|null, content: string|null, errorMessage?: string};
   /** Version information for all ServiceWorkers active after the first page load. */
   ServiceWorker: {versions: LH.Crdp.ServiceWorker.ServiceWorkerVersion[], registrations: LH.Crdp.ServiceWorker.ServiceWorkerRegistration[]};
   /** Source maps of scripts executed in the page. */
@@ -532,14 +534,7 @@ declare module Artifacts {
     };
   }
 
-  interface Rect {
-    width: number;
-    height: number;
-    top: number;
-    right: number;
-    bottom: number;
-    left: number;
-  }
+  type Rect = AuditDetails.Rect;
 
   interface TapTarget {
     node: NodeDetails;
@@ -598,15 +593,7 @@ declare module Artifacts {
     }[];
   }
 
-  interface MeasureEntry {
-    // From PerformanceEntry
-    readonly duration: number;
-    readonly entryType: string;
-    readonly name: string;
-    readonly startTime: number;
-    /** Whether timing entry was collected during artifact gathering. */
-    gather?: boolean;
-  }
+  type MeasureEntry = LHResult.MeasureEntry;
 
   interface MetricComputationDataInput {
     devtoolsLog: DevtoolsLog;

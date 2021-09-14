@@ -12,19 +12,36 @@
     // "noErrorTruncation": true,
 
     "resolveJsonModule": true,
-    "diagnostics": true
+    "diagnostics": true,
+    "composite": true,
+    "outDir": ".tmp/tsbuildinfo/",
+    "esModuleInterop": true,
   },
   "include": [
+    "root.js",
     "lighthouse-cli/**/*.js",
     "lighthouse-core/**/*.js",
-    "report/**/*.js",
     "clients/**/*.js",
     "build/**/*.js",
     "./types/**/*.d.ts",
     "eslint-local-rules.js",
+
+    // TODO(esmodules): JSON files included via resolveJsonModule. Removable on the switch to ES Modules.
+    "package.json",
+    "lighthouse-core/lib/i18n/locales/en-US.json",
+    "lighthouse-core/test/results/sample_v2.json",
+    "lighthouse-core/lib/sd-validation/assets/*.json",
+    "lighthouse-core/test/fixtures/unresolved-perflog.json",
+    "lighthouse-core/test/fixtures/traces/lcp-m78.devtools.log.json",
+    "third-party/snyk/snapshot.json",
+    "lighthouse-core/audits/byte-efficiency/polyfill-graph-data.json",
+  ],
+  "references": [
+    {"path": "./types/lhr/"},
+    {"path": "./report/"},
+    {"path": "./report/generator/"},
   ],
   "exclude": [
-    "lighthouse-core/lib/cdt",
     "lighthouse-core/test/audits/**/*.js",
     "lighthouse-core/test/fixtures/**/*.js",
     "lighthouse-core/test/computed/**/*.js",
@@ -33,7 +50,6 @@
     "lighthouse-core/scripts/legacy-javascript/variants",
     "lighthouse-core/test/chromium-web-tests/webtests",
     // These test files require further changes before they can be type checked.
-    "report/test/**/*.js",
     "lighthouse-core/test/config/budget-test.js",
     "lighthouse-core/test/config/config-helpers-test.js",
     "lighthouse-core/test/config/config-plugin-test.js",
@@ -105,7 +121,9 @@
     "lighthouse-core/test/scripts/i18n/collect-strings-test.js",
   ],
   "files": [
-    // Opt-in to typechecking for some core tests.
+    // Opt-in to typechecking for some core tests and test-support files.
     "lighthouse-core/test/audits/script-treemap-data-test.js",
+    "lighthouse-cli/test/fixtures/static-server.js",
+    "lighthouse-core/test/fixtures/config-plugins/lighthouse-plugin-simple/plugin-simple.js",
   ],
 }
