@@ -139,9 +139,11 @@ export class Util {
         }
       });
 
-      category.auditRefs.sort((a, b) => {
-        return b.weight - a.weight;
-      });
+      if (category.id !== 'performance') {
+        category.auditRefs.sort((a, b) => {
+          return b.weight - a.weight;
+        });
+      }
     }
 
     return clone;
