@@ -188,6 +188,8 @@ async function build(entryPath, distPath, opts = {minify: true}) {
       }),
       json(),
       nodeResolve({preferBuiltins: true}),
+      // TODO: ideally would use https://github.com/snowpackjs/rollup-plugin-polyfill-node
+      // More maintained. also has EventEmitter.off. But it gets rollup errors from commonjs.
       nodePolyfills(),
       // Rollup sees the usages of these functions in page functions (ex: see AnchorElements)
       // and treats them as globals. Because the names are "taken" by the global, Rollup renames
