@@ -44,17 +44,28 @@ const Logo: FunctionComponent = () => {
 };
 /* eslint-enable max-len */
 
-export const Topbar: FunctionComponent<{onMenuClick: JSX.MouseEventHandler<HTMLDivElement>}> =
+const TopbarButton: FunctionComponent<{onClick: JSX.MouseEventHandler<HTMLButtonElement>}> =
+({onClick, children}) => {
+  return (
+    <button className="TopbarButton" onClick={onClick}>
+      {children}
+    </button>
+  );
+};
+
+export const Topbar: FunctionComponent<{onMenuClick: JSX.MouseEventHandler<HTMLButtonElement>}> =
 ({onMenuClick}) => {
   return (
     <div className="Topbar">
-      <div className="Topbar__menu" onClick={onMenuClick} role="button">
+      <TopbarButton onClick={onMenuClick}>
         <HamburgerIcon/>
-      </div>
+      </TopbarButton>
       <div className="Topbar__logo">
         <Logo/>
       </div>
       <div className="Topbar__title">Lighthouse User Flow Report</div>
+      <TopbarButton onClick={() => {}}>Print</TopbarButton>
+      <TopbarButton onClick={() => {}}>Save</TopbarButton>
     </div>
   );
 };
