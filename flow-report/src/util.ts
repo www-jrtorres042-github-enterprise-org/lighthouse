@@ -75,6 +75,24 @@ export function getScreenshot(reportResult: LH.ReportResult) {
   return fullPageScreenshot || null;
 }
 
+export function computeFilename(flowResult: LH.FlowResult) {
+  const lhr = flowResult.lhrs[0];
+  const date = (lhr.fetchTime && new Date(lhr.fetchTime)) || new Date();
+
+  const timeStr = date.toLocaleTimeString('en-US', {hour12: false});
+  const dateParts = date.toLocaleDateString('en-US', {
+    year: 'numeric', month: '2-digit', day: '2-digit',
+  }).split('/');
+  // @ts-expect-error - parts exists
+  dateParts.unshift(dateParts.pop());
+  const dateStr = dateParts.join('-');
+
+  // TODO: Replace "flow" with provided flow name.
+  const filenamePrefix = `flow_${dateStr}_${timeStr}`;
+  // replace characters that are unfriendly to filenames
+  return filenamePrefix.replace(/[/?<>\\:*|"]/g, '-');
+}
+
 export function downloadFile(blob: Blob, filename: string) {
   const ext = blob.type.match('json') ? '.json' : '.html';
 

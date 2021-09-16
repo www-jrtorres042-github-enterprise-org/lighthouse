@@ -8,7 +8,7 @@ import {FunctionComponent, JSX} from 'preact';
 import {useCallback} from 'preact/hooks';
 
 import {HamburgerIcon} from './icons';
-import {downloadFile} from './util';
+import {computeFilename, downloadFile, useFlowResult} from './util';
 
 /* eslint-disable max-len */
 const Logo: FunctionComponent = () => {
@@ -57,14 +57,19 @@ const TopbarButton: FunctionComponent<{onClick: JSX.MouseEventHandler<HTMLButton
 
 export const Topbar: FunctionComponent<{onMenuClick: JSX.MouseEventHandler<HTMLButtonElement>}> =
 ({onMenuClick}) => {
+  const flowResult = useFlowResult();
+
   const save = useCallback(() => {
     const htmlStr = document.documentElement.outerHTML;
     const blob = new Blob([htmlStr], {type: 'text/html'});
-    downloadFile(blob, 'flow.report');
-  }, []);
+    const filename = computeFilename(flowResult);
+    downloadFile(blob, filename);
+  }, [flowResult]);
+
   const print = useCallback(() => {
     window.print();
   }, []);
+
   return (
     <div className="Topbar">
       <TopbarButton onClick={onMenuClick}>
