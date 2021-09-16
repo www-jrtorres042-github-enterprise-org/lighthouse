@@ -10,9 +10,16 @@ import {useState} from 'preact/hooks';
 import {ReportRendererProvider} from './wrappers/report-renderer';
 import {Sidebar} from './sidebar/sidebar';
 import {Summary} from './summary/summary';
-import {classNames, FlowResultContext, useCurrentLhr} from './util';
+import {classNames, computeFilename, downloadFile, FlowResultContext, useCurrentLhr} from './util';
 import {Report} from './wrappers/report';
 import {Topbar} from './topbar';
+
+function saveHtml(flowResult: LH.FlowResult) {
+  const htmlStr = document.documentElement.outerHTML;
+  const blob = new Blob([htmlStr], {type: 'text/html'});
+  const filename = computeFilename(flowResult);
+  downloadFile(blob, filename);
+}
 
 const Content: FunctionComponent = () => {
   const currentLhr = useCurrentLhr();
@@ -34,7 +41,11 @@ export const App: FunctionComponent<{flowResult: LH.FlowResult}> = ({flowResult}
     <FlowResultContext.Provider value={flowResult}>
       <ReportRendererProvider>
         <div className={classNames('App', {'App--collapsed': collapsed})}>
-          <Topbar onMenuClick={() => setCollapsed(c => !c)} />
+          <Topbar
+            onMenuClick={() => setCollapsed(c => !c)}
+            onPrintClick={() => window.print()}
+            onSaveClick={() => saveHtml(flowResult)}
+          />
           <Sidebar/>
           <Content/>
         </div>
