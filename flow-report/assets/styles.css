@@ -43,6 +43,10 @@
 }
 
 @media print {
+  @page {
+    size: landscape;
+  }
+
   .App {
     grid-template-rows: 0px auto !important;
     grid-template-columns: 0px auto !important;
@@ -54,6 +58,10 @@
 
   .Sidebar {
     display: none !important;
+  }
+
+  .Content {
+    overflow-y: visible !important;
   }
 
   .SummaryFlow {
