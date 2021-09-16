@@ -75,6 +75,21 @@ export function getScreenshot(reportResult: LH.ReportResult) {
   return fullPageScreenshot || null;
 }
 
+export function downloadFile(blob: Blob, filename: string) {
+  const ext = blob.type.match('json') ? '.json' : '.html';
+
+  const a = document.createElement('a');
+  a.download = `${filename}${ext}`;
+  a.href = URL.createObjectURL(blob);
+  document.body.appendChild(a); // Firefox requires anchor to be in the DOM.
+  console.log(a);
+  a.click();
+
+  // cleanup.
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(a.href), 500);
+}
+
 export function useFlowResult(): LH.FlowResult {
   const flowResult = useContext(FlowResultContext);
   if (!flowResult) throw Error('useFlowResult must be called in the FlowResultContext');
