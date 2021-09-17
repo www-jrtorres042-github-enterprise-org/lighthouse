@@ -453,4 +453,16 @@ export class ReportUIFeatures {
     this._document.body.removeChild(a);
     setTimeout(() => URL.revokeObjectURL(a.href), 500);
   }
+
+  /**
+   * @param {LH.Result=} newLhr
+   */
+  _refresh(newLhr) {
+    this._document.dispatchEvent(new CustomEvent(ReportUIFeatures.Events.refreshLighthouseReport, {
+      detail: {
+        features: this,
+        newLhr,
+      },
+    }));
+  }
 }
