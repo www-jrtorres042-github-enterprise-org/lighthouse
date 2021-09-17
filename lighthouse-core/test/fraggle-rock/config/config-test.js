@@ -9,6 +9,7 @@ const BaseAudit = require('../../../audits/audit.js');
 const {nonSimulatedPassConfigOverrides} = require('../../../config/constants.js');
 const BaseGatherer = require('../../../fraggle-rock/gather/base-gatherer.js');
 const {initializeConfig} = require('../../../fraggle-rock/config/config.js');
+const {LH_ROOT} = require('../../../../root.js');
 
 /* eslint-env jest */
 
@@ -55,6 +56,17 @@ describe('Fraggle Rock Config', () => {
     });
   });
 
+  it('should override throttlingMethod in timespan mode', () => {
+    const {config} = initializeConfig(
+      undefined,
+      {settingsOverrides: {throttlingMethod: 'simulate'}, gatherMode: 'timespan'}
+    );
+
+    expect(config.settings).toMatchObject({
+      throttlingMethod: 'devtools',
+    });
+  });
+
   it('should resolve artifact definitions', () => {
     const configJson = {artifacts: [{id: 'Accessibility', gatherer: 'accessibility'}]};
     const {config} = initializeConfig(configJson, {gatherMode});
@@ -71,6 +83,7 @@ describe('Fraggle Rock Config', () => {
 
   it('should filter configuration by gatherMode', () => {
     const timespanGatherer = new BaseGatherer();
+    timespanGatherer.getArtifact = jest.fn();
     timespanGatherer.meta = {supportedModes: ['timespan']};
 
     const configJson = {
@@ -103,6 +116,23 @@ describe('Fraggle Rock Config', () => {
     expect(auditIds).not.toContain('robots-txt'); // from skipAudits
   });
 
+  it('should support plugins', () => {
+    const {config} = initializeConfig(undefined, {
+      gatherMode: 'navigation',
+      configPath: `${LH_ROOT}/lighthouse-core/test/fixtures/config-plugins/`,
+      settingsOverrides: {plugins: ['lighthouse-plugin-simple']},
+    });
+
+    expect(config).toMatchObject({
+      categories: {
+        'lighthouse-plugin-simple': {title: 'Simple'},
+      },
+      groups: {
+        'lighthouse-plugin-simple-new-group': {title: 'New Group'},
+      },
+    });
+  });
+
   describe('resolveArtifactDependencies', () => {
     /** @type {LH.Gatherer.FRGathererInstance} */
     let dependencyGatherer;
@@ -114,9 +144,11 @@ describe('Fraggle Rock Config', () => {
     beforeEach(() => {
       const dependencySymbol = Symbol('dependency');
       dependencyGatherer = new BaseGatherer();
+      dependencyGatherer.getArtifact = jest.fn();
       dependencyGatherer.meta = {symbol: dependencySymbol, supportedModes: ['snapshot']};
       // @ts-expect-error - we satisfy the interface on the next line
       dependentGatherer = new BaseGatherer();
+      dependentGatherer.getArtifact = jest.fn();
       dependentGatherer.meta = {
         supportedModes: ['snapshot'],
         dependencies: {ImageElements: dependencySymbol},
@@ -303,6 +335,7 @@ describe('Fraggle Rock Config', () => {
 
     beforeEach(() => {
       const gatherer = new BaseGatherer();
+      gatherer.getArtifact = jest.fn();
       gatherer.meta = {supportedModes: ['navigation']};
 
       class ExtraAudit extends BaseAudit {
@@ -310,6 +343,7 @@ describe('Fraggle Rock Config', () => {
           return {
             id: 'extra-audit',
             title: 'Extra',
+            failureTitle: 'Extra',
             description: 'Extra',
             requiredArtifacts: /** @type {*} */ (['ExtraArtifact']),
           };
@@ -421,7 +455,28 @@ describe('Fraggle Rock Config', () => {
     });
   });
 
-  it.todo('should support plugins');
-  it.todo('should adjust default pass options for throttling method');
-  it.todo('should validate audit/gatherer interdependencies');
+  it('should validate the config with warnings', () => {
+    /** @type {LH.Config.Json} */
+    const extensionConfig = {
+      extends: 'lighthouse:default',
+      navigations: [{id: 'default', loadFailureMode: 'warn'}],
+    };
+
+    const {config, warnings} = initializeConfig(extensionConfig, {gatherMode: 'navigation'});
+    const navigations = config.navigations;
+    if (!navigations) throw new Error(`Failed to initialize navigations`);
+    expect(warnings).toHaveLength(1);
+    expect(navigations[0].loadFailureMode).toEqual('fatal');
+  });
+
+  it('should validate the config with fatal errors', () => {
+    /** @type {LH.Config.Json} */
+    const extensionConfig = {
+      extends: 'lighthouse:default',
+      artifacts: [{id: 'artifact', gatherer: {instance: new BaseGatherer()}}],
+    };
+
+    const invocation = () => initializeConfig(extensionConfig, {gatherMode: 'navigation'});
+    expect(invocation).toThrow(/did not support any gather modes/);
+  });
 });

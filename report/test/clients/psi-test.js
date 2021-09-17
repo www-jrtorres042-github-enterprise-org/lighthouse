@@ -7,9 +7,10 @@
 
 import {strict as assert} from 'assert';
 import fs from 'fs';
+
 import jsdom from 'jsdom';
+
 import testUtils from '../../../lighthouse-core/test/test-utils.js';
-import reportAssets from '../../report-assets.js';
 import {prepareLabData} from '../../clients/psi.js';
 import {Util} from '../../renderer/util.js';
 import {I18n} from '../../renderer/i18n.js';
@@ -28,7 +29,7 @@ const sampleResultsStr =
 
 /* eslint-env jest */
 
-describe('DOM', () => {
+describe('PSI', () => {
   let document;
   beforeAll(() => {
     global.Util = Util;
@@ -41,7 +42,7 @@ describe('DOM', () => {
     global.ElementScreenshotRenderer = ElementScreenshotRenderer;
     global.ReportUIFeatures = ReportUIFeatures;
 
-    const {window} = new jsdom.JSDOM(reportAssets.REPORT_TEMPLATES);
+    const {window} = new jsdom.JSDOM();
     document = window.document;
   });
 

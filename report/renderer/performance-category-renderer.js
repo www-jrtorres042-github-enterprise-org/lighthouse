@@ -27,7 +27,7 @@ export class PerformanceCategoryRenderer extends CategoryRenderer {
    * @return {!Element}
    */
   _renderMetric(audit) {
-    const tmpl = this.dom.cloneTemplate('#tmpl-lh-metric', this.templateContext);
+    const tmpl = this.dom.createComponent('metric');
     const element = this.dom.find('.lh-metric', tmpl);
     element.id = audit.result.id;
     const rating = Util.calculateRating(audit.result.score, audit.result.scoreDisplayMode);
@@ -58,7 +58,7 @@ export class PerformanceCategoryRenderer extends CategoryRenderer {
    * @return {!Element}
    */
   _renderOpportunity(audit, scale) {
-    const oppTmpl = this.dom.cloneTemplate('#tmpl-lh-opportunity', this.templateContext);
+    const oppTmpl = this.dom.createComponent('opportunity');
     const element = this.populateAuditValues(audit, oppTmpl);
     element.id = audit.result.id;
 
@@ -155,27 +155,27 @@ export class PerformanceCategoryRenderer extends CategoryRenderer {
   /**
    * @param {LH.ReportResult.Category} category
    * @param {Object<string, LH.Result.ReportGroup>} groups
-   * @param {'PSI'=} environment 'PSI' and undefined are the only valid values
+   * @param {{gatherMode: LH.Result.GatherMode, environment?: 'PSI'}=} options
    * @return {Element}
    * @override
    */
-  render(category, groups, environment) {
+  render(category, groups, options) {
     const strings = Util.i18n.strings;
     const element = this.dom.createElement('div', 'lh-category');
-    if (environment === 'PSI') {
+    if (options && options.environment === 'PSI') {
       const gaugeEl = this.dom.createElement('div', 'lh-score__gauge');
-      gaugeEl.appendChild(this.renderScoreGauge(category, groups));
+      gaugeEl.appendChild(this.renderCategoryScore(category, groups, options));
       element.appendChild(gaugeEl);
     } else {
       this.createPermalinkSpan(element, category.id);
-      element.appendChild(this.renderCategoryHeader(category, groups));
+      element.appendChild(this.renderCategoryHeader(category, groups, options));
     }
 
     // Metrics.
     const metricAuditsEl = this.renderAuditGroup(groups.metrics);
 
     // Metric descriptions toggle.
-    const toggleTmpl = this.dom.cloneTemplate('#tmpl-lh-metrics-toggle', this.templateContext);
+    const toggleTmpl = this.dom.createComponent('metricsToggle');
     const _toggleEl = this.dom.find('.lh-metrics-toggle', toggleTmpl);
     metricAuditsEl.append(..._toggleEl.childNodes);
 
@@ -229,7 +229,7 @@ export class PerformanceCategoryRenderer extends CategoryRenderer {
       const maxWaste = Math.max(...wastedMsValues);
       const scale = Math.max(Math.ceil(maxWaste / 1000) * 1000, minimumScale);
       const groupEl = this.renderAuditGroup(groups['load-opportunities']);
-      const tmpl = this.dom.cloneTemplate('#tmpl-lh-opportunity-header', this.templateContext);
+      const tmpl = this.dom.createComponent('opportunityHeader');
 
       this.dom.find('.lh-load-opportunity__col--one', tmpl).textContent =
         strings.opportunityResourceColumnLabel;

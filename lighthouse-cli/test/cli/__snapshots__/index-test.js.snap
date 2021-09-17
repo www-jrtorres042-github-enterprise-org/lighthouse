@@ -142,6 +142,9 @@ Object {
       "path": "largest-contentful-paint-element",
     },
     Object {
+      "path": "lcp-lazy-loaded",
+    },
+    Object {
       "path": "layout-shift-elements",
     },
     Object {
@@ -904,6 +907,7 @@ Object {
             "dom-size",
             "duplicated-javascript",
             "legacy-javascript",
+            "viewport",
           ],
           "weight": 30,
         },
@@ -1094,6 +1098,11 @@ Object {
         },
         Object {
           "group": "diagnostics",
+          "id": "lcp-lazy-loaded",
+          "weight": 0,
+        },
+        Object {
+          "group": "diagnostics",
           "id": "layout-shift-elements",
           "weight": 0,
         },
@@ -1120,6 +1129,11 @@ Object {
         Object {
           "group": "diagnostics",
           "id": "unsized-images",
+          "weight": 0,
+        },
+        Object {
+          "group": "diagnostics",
+          "id": "viewport",
           "weight": 0,
         },
         Object {
@@ -1429,9 +1443,6 @@ Object {
           "path": "main-document-content",
         },
         Object {
-          "path": "gather-context",
-        },
-        Object {
           "path": "global-listeners",
         },
         Object {
@@ -1542,6 +1553,7 @@ Object {
     "blockedUrlPatterns": null,
     "budgets": null,
     "channel": "cli",
+    "debugNavigation": false,
     "disableStorageReset": false,
     "emulatedUserAgent": "Mozilla/5.0 (Linux; Android 7.0; Moto G (4)) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/94.0.4590.2 Mobile Safari/537.36 Chrome-Lighthouse",
     "extraHeaders": null,
@@ -1679,11 +1691,7 @@ Object {
       "blankPage": "about:blank",
       "blockedUrlPatterns": Array [],
       "cpuQuietThresholdMs": 1000,
-      "gatherers": Array [
-        Object {
-          "path": "gather-context",
-        },
-      ],
+      "gatherers": Array [],
       "loadFailureMode": "fatal",
       "networkQuietThresholdMs": 1000,
       "passName": "defaultPass",
@@ -1699,6 +1707,7 @@ Object {
     "blockedUrlPatterns": null,
     "budgets": null,
     "channel": "cli",
+    "debugNavigation": false,
     "disableStorageReset": false,
     "emulatedUserAgent": "Mozilla/5.0 (Linux; Android 7.0; Moto G (4)) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/94.0.4590.2 Mobile Safari/537.36 Chrome-Lighthouse",
     "extraHeaders": null,

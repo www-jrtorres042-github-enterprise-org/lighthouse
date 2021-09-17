@@ -7,9 +7,12 @@
 
 /* eslint-disable max-len */
 
-const yargs = require('yargs');
-const fs = require('fs');
-const {isObjectOfUnknownValues} = require('../lighthouse-core/lib/type-verifiers.js');
+import fs from 'fs';
+
+import yargs from 'yargs';
+import * as yargsHelpers from 'yargs/helpers';
+
+import {isObjectOfUnknownValues} from '../lighthouse-core/lib/type-verifiers.js';
 
 /**
  * @param {string=} manualArgv
@@ -17,8 +20,10 @@ const {isObjectOfUnknownValues} = require('../lighthouse-core/lib/type-verifiers
  * @return {LH.CliFlags}
  */
 function getFlags(manualArgv, options = {}) {
-  // @ts-expect-error - undocumented, but yargs() supports parsing a single `string`.
-  const y = manualArgv ? yargs(manualArgv) : yargs;
+  const y = manualArgv ?
+    // @ts-expect-error - undocumented, but yargs() supports parsing a single `string`.
+    yargs(manualArgv) :
+    yargs(yargsHelpers.hideBin(process.argv));
 
   let parser = y.help('help')
       .showHelpOnFail(false, 'Specify --help for available options')
@@ -107,6 +112,10 @@ function getFlags(manualArgv, options = {}) {
           type: 'boolean',
           default: false,
           describe: 'Print the normalized config for the given config and options, then exit.',
+        },
+        'debug-navigation': {
+          type: 'boolean',
+          describe: 'Pause after page load to wait for permission to continue the run, evaluate `continueLighthouseRun` in the console to continue.',
         },
         'fraggle-rock': {
           type: 'boolean',
@@ -314,7 +323,7 @@ function getFlags(manualArgv, options = {}) {
         throw new Error('Please provide a url');
       })
       .epilogue('For more information on Lighthouse, see https://developers.google.com/web/tools/lighthouse/.')
-      .wrap(yargs.terminalWidth());
+      .wrap(y.terminalWidth());
 
   if (options.noExitOnFailure) {
     // Silence console.error() logging and don't process.exit().
@@ -362,16 +371,20 @@ function coerceOptionalStringBoolean(value) {
  */
 function coerceOutput(values) {
   const outputTypes = ['json', 'html', 'csv'];
-  const errorMsg = `Invalid values. Argument 'output' must be an array from choices "${outputTypes.join('", "')}"`;
+  const errorHint = `Argument 'output' must be an array from choices "${outputTypes.join('", "')}"`;
   if (!values.every(/** @return {item is string} */ item => typeof item === 'string')) {
-    throw new Error(errorMsg);
+    throw new Error('Invalid values. ' + errorHint);
   }
   // Allow parsing of comma-separated values.
   const strings = values.flatMap(value => value.split(','));
-  if (!strings.every(/** @return {str is LH.OutputMode} */ str => outputTypes.includes(str))) {
-    throw new Error(errorMsg);
-  }
-  return strings;
+  const validValues = strings.filter(/** @return {str is LH.OutputMode} */ str => {
+    if (!outputTypes.includes(str)) {
+      throw new Error(`"${str}" is not a valid 'output' value. ` + errorHint);
+    }
+    return true;
+  });
+
+  return validValues;
 }
 
 /**
@@ -491,6 +504,6 @@ function coerceScreenEmulation(value) {
   return screenEmulationSettings;
 }
 
-module.exports = {
+export {
   getFlags,
 };

@@ -13,14 +13,22 @@
 
 /* eslint-disable no-console */
 
-const path = require('path');
-const cloneDeep = require('lodash.clonedeep');
-const yargs = require('yargs');
-const log = require('lighthouse-logger');
-const {runSmokehouse} = require('../smokehouse.js');
-const {updateTestDefnFormat} = require('./back-compat-util.js');
+import {strict as assert} from 'assert';
+import path from 'path';
+import fs from 'fs';
+import url from 'url';
 
-const coreTestDefnsPath = path.join(__dirname, '../test-definitions/core-tests.js');
+import cloneDeep from 'lodash.clonedeep';
+import yargs from 'yargs';
+import * as yargsHelpers from 'yargs/helpers';
+import log from 'lighthouse-logger';
+
+import {runSmokehouse} from '../smokehouse.js';
+import {updateTestDefnFormat} from './back-compat-util.js';
+import {LH_ROOT} from '../../../../root.js';
+
+const coreTestDefnsPath =
+  path.join(LH_ROOT, 'lighthouse-cli/test/smokehouse/test-definitions/core-tests.js');
 
 /**
  * Possible Lighthouse runners. Loaded dynamically so e.g. a CLI run isn't
@@ -73,6 +81,52 @@ function getDefinitionsToRun(allTestDefns, requestedIds, {invertMatch}) {
 }
 
 /**
+ * Parses the cli `shardArg` flag into `shardNumber/shardTotal`. Splits
+ * `testDefns` into `shardTotal` shards and returns the `shardNumber`th shard.
+ * Shards will differ in size by at most 1.
+ * Shard params must be 1 ≤ shardNumber ≤ shardTotal.
+ * @param {Array<Smokehouse.TestDfn>} testDefns
+ * @param {string=} shardArg
+ * @return {Array<Smokehouse.TestDfn>}
+ */
+function getShardedDefinitions(testDefns, shardArg) {
+  if (!shardArg) return testDefns;
+
+  // eslint-disable-next-line max-len
+  const errorMessage = `'shard' must be of the form 'n/d' and n and d must be positive integers with 1 ≤ n ≤ d. Got '${shardArg}'`;
+  const match = /^(?<shardNumber>\d+)\/(?<shardTotal>\d+)$/.exec(shardArg);
+  assert(match && match.groups, errorMessage);
+  const shardNumber = Number(match.groups.shardNumber);
+  const shardTotal = Number(match.groups.shardTotal);
+  assert(shardNumber > 0 && Number.isInteger(shardNumber), errorMessage);
+  assert(shardTotal > 0 && Number.isInteger(shardTotal));
+  assert(shardNumber <= shardTotal, errorMessage);
+
+  // Array is sharded with `Math.ceil(length / shardTotal)` shards first
+  // and then the remaining `Math.floor(length / shardTotal) shards.
+  // e.g. `[0, 1, 2, 3]` split into 3 shards is `[[0, 1], [2], [3]]`.
+  const baseSize = Math.floor(testDefns.length / shardTotal);
+  const biggerSize = baseSize + 1;
+  const biggerShardCount = testDefns.length % shardTotal;
+
+  // Since we don't have tests for this file, construct all shards so correct
+  // structure can be asserted.
+  const shards = [];
+  let index = 0;
+  for (let i = 0; i < shardTotal; i++) {
+    const shardSize = i < biggerShardCount ? biggerSize : baseSize;
+    shards.push(testDefns.slice(index, index + shardSize));
+    index += shardSize;
+  }
+  assert.equal(shards.length, shardTotal);
+  assert.deepEqual(shards.flat(), testDefns);
+
+  const shardDefns = shards[shardNumber - 1];
+  console.log(`In this shard (${shardArg}), running: ${shardDefns.map(d => d.id).join(' ')}\n`);
+  return shardDefns;
+}
+
+/**
  * Prune the `networkRequests` from the test expectations when `takeNetworkRequestUrls`
  * is not defined. Custom servers may not have this method available in-process.
  * Also asserts that any expectation with `networkRequests` is run serially. For core
@@ -112,7 +166,8 @@ function pruneExpectedNetworkRequests(testDefns, takeNetworkRequestUrls) {
  * CLI entry point.
  */
 async function begin() {
-  const rawArgv = yargs
+  const y = yargs(yargsHelpers.hideBin(process.argv));
+  const rawArgv = y
     .help('help')
     .usage('node $0 [<options>] <test-ids>')
     .example('node $0 -j=1 pwa seo', 'run pwa and seo tests serially')
@@ -155,8 +210,13 @@ async function begin() {
         default: false,
         describe: 'Run all available tests except the ones provided',
       },
+      'shard': {
+        type: 'string',
+        // eslint-disable-next-line max-len
+        describe: 'A argument of the form "n/d", which divides the selected tests into d groups and runs the nth group. n and d must be positive integers with 1 ≤ n ≤ d.',
+      },
     })
-    .wrap(yargs.terminalWidth())
+    .wrap(y.terminalWidth())
     .argv;
 
   // Augmenting yargs type with auto-camelCasing breaks in tsc@4.1.2 and @types/yargs@15.0.11,
@@ -170,18 +230,19 @@ async function begin() {
   if (argv.runner === 'bundle') {
     console.log('\n✨ Be sure to have recently run this: yarn build-all');
   }
-  const lighthouseRunner = require(runnerPath).runLighthouse;
+  const {runLighthouse} = await import(runnerPath);
 
   // Find test definition file and filter by requestedTestIds.
   let testDefnPath = argv.testsPath || coreTestDefnsPath;
   testDefnPath = path.resolve(process.cwd(), testDefnPath);
   const requestedTestIds = argv._;
-  const rawTestDefns = require(testDefnPath);
+  const {default: rawTestDefns} = await import(url.pathToFileURL(testDefnPath).href);
   const allTestDefns = updateTestDefnFormat(rawTestDefns);
   const invertMatch = argv.invertMatch;
-  const testDefns = getDefinitionsToRun(allTestDefns, requestedTestIds, {invertMatch});
+  const requestedTestDefns = getDefinitionsToRun(allTestDefns, requestedTestIds, {invertMatch});
+  const testDefns = getShardedDefinitions(requestedTestDefns, argv.shard);
 
-  let isPassing;
+  let smokehouseResult;
   let server;
   let serverForOffline;
   let takeNetworkRequestUrls = undefined;
@@ -189,7 +250,7 @@ async function begin() {
   try {
     // If running the core tests, spin up the test server.
     if (testDefnPath === coreTestDefnsPath) {
-      ({server, serverForOffline} = require('../../fixtures/static-server.js'));
+      ({server, serverForOffline} = await import('../../fixtures/static-server.js'));
       server.listen(10200, 'localhost');
       serverForOffline.listen(10503, 'localhost');
       takeNetworkRequestUrls = server.takeRequestUrls.bind(server);
@@ -201,17 +262,41 @@ async function begin() {
       retries,
       isDebug: argv.debug,
       useFraggleRock: argv.fraggleRock,
-      lighthouseRunner,
+      lighthouseRunner: runLighthouse,
       takeNetworkRequestUrls,
     };
 
-    isPassing = (await runSmokehouse(prunedTestDefns, options)).success;
+    smokehouseResult = (await runSmokehouse(prunedTestDefns, options));
   } finally {
     if (server) await server.close();
     if (serverForOffline) await serverForOffline.close();
   }
 
-  const exitCode = isPassing ? 0 : 1;
+  if (!smokehouseResult.success) {
+    const failedTestResults = smokehouseResult.testResults.filter(r => r.failed);
+
+    // For CI, save failed runs to directory to be uploaded.
+    if (process.env.CI) {
+      const failuresDir = `${LH_ROOT}/.tmp/smokehouse-ci-failures`;
+      fs.mkdirSync(failuresDir, {recursive: true});
+
+      for (const testResult of failedTestResults) {
+        for (let i = 0; i < testResult.runs.length; i++) {
+          const run = testResult.runs[i];
+          fs.writeFileSync(`${failuresDir}/${testResult.id}-${i}.json`, JSON.stringify({
+            ...run,
+            lighthouseLog: run.lighthouseLog.split('\n'),
+            assertionLog: run.assertionLog.split('\n'),
+          }, null, 2));
+        }
+      }
+    }
+
+    const cmd = `yarn smoke ${failedTestResults.map(r => r.id).join(' ')}`;
+    console.log(`rerun failures: ${cmd}`);
+  }
+
+  const exitCode = smokehouseResult.success ? 0 : 1;
   process.exit(exitCode);
 }
 

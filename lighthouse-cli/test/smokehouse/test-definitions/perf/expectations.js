@@ -203,7 +203,7 @@ const traceElements = {
         traceEventType: 'largest-contentful-paint',
         node: {
           nodeLabel: 'section > img',
-          snippet: '<img src="../dobetterweb/lighthouse-480x318.jpg">',
+          snippet: '<img src="../dobetterweb/lighthouse-480x318.jpg" loading="lazy">',
           boundingRect: {
             top: 108,
             bottom: 426,
@@ -295,6 +295,19 @@ const traceElements = {
           ],
         },
       },
+      'lcp-lazy-loaded': {
+        score: 0,
+        details: {
+          items: [
+            {
+              node: {
+                type: 'node',
+                nodeLabel: 'section > img',
+              },
+            },
+          ],
+        },
+      },
       'layout-shift-elements': {
         score: null,
         displayValue: '2 elements found',
@@ -362,10 +375,19 @@ const frameMetrics = {
   },
 };
 
-module.exports = {
+const debug = {
+  lhr: {
+    requestedUrl: 'http://localhost:10200/perf/debug.html',
+    finalUrl: 'http://localhost:10200/perf/debug.html',
+    audits: {metrics: {details: {items: {0: {observedTraceEnd: '>30000'}}}}},
+  },
+};
+
+export {
   preload,
   budgets,
   fonts,
+  debug,
   traceElements,
   frameMetrics,
 };

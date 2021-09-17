@@ -6,11 +6,18 @@
 'use strict';
 
 const rollup = require('rollup');
+const {nodeResolve} = require('@rollup/plugin-node-resolve');
 const {terser} = require('rollup-plugin-terser');
 // Only needed b/c getFilenamePrefix loads a commonjs module.
 const commonjs =
   // @ts-expect-error types are wrong.
   /** @type {import('rollup-plugin-commonjs').default} */ (require('rollup-plugin-commonjs'));
+
+/**
+ * @type {import('@rollup/plugin-typescript').default}
+ */
+// @ts-expect-error types are wrong.
+const typescript = require('@rollup/plugin-typescript');
 
 async function buildStandaloneReport() {
   const bundle = await rollup.rollup({
@@ -23,6 +30,31 @@ async function buildStandaloneReport() {
 
   await bundle.write({
     file: 'dist/report/standalone.js',
+    format: 'iife',
+  });
+}
+
+async function buildFlowReport() {
+  const bundle = await rollup.rollup({
+    input: 'flow-report/standalone-flow.tsx',
+    plugins: [
+      nodeResolve(),
+      commonjs(),
+      typescript({
+        tsconfig: 'flow-report/tsconfig.json',
+        // Plugin struggles with custom outDir, so revert it from tsconfig value
+        // as well as any options that require an outDir is set.
+        outDir: null,
+        composite: false,
+        emitDeclarationOnly: false,
+        declarationMap: false,
+      }),
+      terser(),
+    ],
+  });
+
+  await bundle.write({
+    file: 'dist/report/flow.js',
     format: 'iife',
   });
 }
@@ -41,34 +73,6 @@ async function buildPsiReport() {
   });
 }
 
-async function buildViewerReport() {
-  const bundle = await rollup.rollup({
-    input: 'report/clients/viewer.js',
-    plugins: [
-      commonjs(),
-    ],
-  });
-
-  await bundle.write({
-    file: 'dist/report/viewer.js',
-    format: 'iife',
-  });
-}
-
-async function buildTreemapReport() {
-  const bundle = await rollup.rollup({
-    input: 'report/clients/treemap.js',
-    plugins: [
-      commonjs(),
-    ],
-  });
-
-  await bundle.write({
-    file: 'dist/report/treemap.js',
-    format: 'iife',
-  });
-}
-
 async function buildEsModulesBundle() {
   const bundle = await rollup.rollup({
     input: 'report/clients/bundle.js',
@@ -78,23 +82,53 @@ async function buildEsModulesBundle() {
   });
 
   await bundle.write({
-    file: 'dist/report/bundle.js',
+    file: 'dist/report/bundle.esm.js',
     format: 'esm',
   });
 }
 
+async function buildUmdBundle() {
+  const bundle = await rollup.rollup({
+    input: 'report/clients/bundle.js',
+    plugins: [
+      commonjs(),
+    ],
+  });
+
+  await bundle.write({
+    file: 'dist/report/bundle.umd.js',
+    format: 'umd',
+    name: 'report',
+  });
+}
+
 if (require.main === module) {
-  if (process.argv[2] === '--only-standalone') {
+  if (process.argv.length <= 2) {
     buildStandaloneReport();
-  } else {
-    buildStandaloneReport();
+    buildFlowReport();
     buildEsModulesBundle();
+    buildPsiReport();
+    buildUmdBundle();
+  }
+
+  if (process.argv.includes('--psi')) {
+    buildPsiReport();
+  }
+  if (process.argv.includes('--standalone')) {
+    buildStandaloneReport();
+    buildFlowReport();
+  }
+  if (process.argv.includes('--esm')) {
+    buildEsModulesBundle();
+  }
+  if (process.argv.includes('--umd')) {
+    buildUmdBundle();
   }
 }
 
 module.exports = {
   buildStandaloneReport,
+  buildFlowReport,
   buildPsiReport,
-  buildViewerReport,
-  buildTreemapReport,
+  buildUmdBundle,
 };

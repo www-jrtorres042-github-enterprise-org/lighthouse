@@ -133,6 +133,7 @@ describe('Config', () => {
         return {
           id: 'missing-artifact-audit',
           title: 'none',
+          failureTitle: 'none',
           description: 'none',
           requiredArtifacts: [
             // Require fake artifact amidst base artifact and default artifacts.
@@ -161,6 +162,7 @@ describe('Config', () => {
         return {
           id: 'optional-artifact-audit',
           title: 'none',
+          failureTitle: 'none',
           description: 'none',
           requiredArtifacts: [
             'URL', // base artifact
@@ -192,6 +194,7 @@ describe('Config', () => {
         return {
           id: 'optional-artifact-audit',
           title: 'none',
+          failureTitle: 'none',
           description: 'none',
           requiredArtifacts: [
             'URL', // base artifact
@@ -223,6 +226,7 @@ describe('Config', () => {
         return {
           id: 'optional-artifact-audit',
           title: 'none',
+          failureTitle: 'none',
           description: 'none',
           requiredArtifacts: [
             'URL', // base artifact
@@ -254,6 +258,7 @@ describe('Config', () => {
         return {
           id: 'optional-artifact-audit',
           title: 'none',
+          failureTitle: 'none',
           description: 'none',
           requiredArtifacts: [
             'URL', // base artifact
@@ -285,6 +290,7 @@ describe('Config', () => {
         return {
           id: 'base-artifacts-audit',
           title: 'base',
+          failureTitle: 'base',
           description: 'base',
           requiredArtifacts: ['HostUserAgent', 'URL', 'Stacks', 'WebAppManifest'],
         };
@@ -430,7 +436,7 @@ describe('Config', () => {
           }
         },
       ],
-    }), /no failureTitle and should/);
+    }), /no meta.failureTitle and should/);
 
     assert.throws(_ => new Config({
       audits: [basePath + '/missing-description'],
@@ -443,6 +449,7 @@ describe('Config', () => {
             return {
               id: 'empty-string-description',
               title: 'title',
+              failureTitle: 'none',
               description: '',
               requiredArtifacts: [],
             };
@@ -539,7 +546,7 @@ describe('Config', () => {
         onlyAudits: ['color-contrast'],
       },
       passes: [
-        {recordTrace: true, gatherers: ['gather-context']},
+        {recordTrace: true, gatherers: []},
         {passName: 'a11y', gatherers: ['accessibility']},
       ],
       audits: [
@@ -583,7 +590,7 @@ describe('Config', () => {
         skipAudits: ['first-meaningful-paint'],
       },
       passes: [
-        {recordTrace: true, gatherers: ['gather-context']},
+        {recordTrace: true, gatherers: []},
         {passName: 'a11y', gatherers: ['accessibility']},
       ],
       audits: [
@@ -1242,7 +1249,7 @@ describe('Config', () => {
       assert.ok(config.audits.find(a => a.implementation.meta.id === 'full-page-screenshot'));
     });
 
-    it('should keep uncategorized audits even if onlyCategories is set', () => {
+    it('should keep full-page-screenshot even if onlyCategories is set', () => {
       assert.ok(origConfig.audits.includes('full-page-screenshot'));
       // full-page-screenshot does not belong to a category.
       const matchCategories = Object.values(origConfig.categories).filter(cat =>
@@ -1257,6 +1264,17 @@ describe('Config', () => {
       };
       const config = new Config(extended);
 
+      assert.ok(config.audits.find(a => a.implementation.meta.id === 'full-page-screenshot'));
+    });
+
+    it('should keep full-page-screenshot even if skipAudits is set', () => {
+      const extended = {
+        extends: 'lighthouse:default',
+        settings: {
+          skipAudits: ['font-size'],
+        },
+      };
+      const config = new Config(extended);
       assert.ok(config.audits.find(a => a.implementation.meta.id === 'full-page-screenshot'));
     });
   });
