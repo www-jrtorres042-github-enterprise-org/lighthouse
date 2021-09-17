@@ -22,9 +22,9 @@ const rollup = require('rollup');
 const {nodeResolve} = require('@rollup/plugin-node-resolve');
 const {terser} = require('rollup-plugin-terser');
 // Only needed b/c getFilenamePrefix loads a commonjs module.
-const commonjs = rollupPluginTypeCoerce(require('rollup-plugin-commonjs'));
+const commonjs = rollupPluginTypeCoerce(require('@rollup/plugin-commonjs'));
 const replace = rollupPluginTypeCoerce(require('rollup-plugin-replace'));
-const nodePolyfills = rollupPluginTypeCoerce(require('rollup-plugin-node-polyfills'));
+const nodePolyfills = rollupPluginTypeCoerce(require('rollup-plugin-polyfill-node'));
 // @ts-expect-error: no types
 const shim = require('rollup-plugin-shim');
 const {LH_ROOT} = require('../root.js');
@@ -46,14 +46,15 @@ async function main() {
         delimiters: ['', ''],
         values: {
           '[\'__availableLocales__\']': JSON.stringify(actualLocales),
+          '__dirname': '""',
         },
       }),
-      commonjs(),
-      nodeResolve({preferBuiltins: true}),
-      nodePolyfills(),
       shim({
-        [require.resolve('../lighthouse-core/lib/i18n/locales.js')]: 'export default {}',
+        ['./locales.js']: 'export default {}',
       }),
+      commonjs(),
+      nodePolyfills(),
+      nodeResolve(),
       // terser(),
     ],
   });

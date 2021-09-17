@@ -191,7 +191,8 @@ export class ReportUIFeatures {
     const lhlMessages = await this._swapLocaleOptions.fetchData(locale);
     if (!lhlMessages) throw new Error(`could not fetch data for locale: ${locale}`);
 
-    i18nModule.registerLocaleData(locale, lhlMessages);
+    // @ts-expect-error: types are messed up. rollup? maybe should convert lib/i18n is ESM first.
+    i18nModule.default.registerLocaleData(locale, lhlMessages);
     const newLhr = i18nModule.swapLocale(this.json, locale).lhr;
     this._refresh(newLhr);
   }
