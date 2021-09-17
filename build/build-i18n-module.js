@@ -55,7 +55,7 @@ async function main() {
       commonjs(),
       nodePolyfills(),
       nodeResolve(),
-      // terser(),
+      terser(),
     ],
   });
 

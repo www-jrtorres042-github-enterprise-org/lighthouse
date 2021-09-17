@@ -10,7 +10,7 @@ const path = require('path');
 const rollup = require('rollup');
 const commonjs =
   // @ts-expect-error types are wrong.
-  /** @type {import('rollup-plugin-commonjs').default} */ (require('rollup-plugin-commonjs'));
+  /** @type {import('@rollup/plugin-commonjs').default} */ (require('@rollup/plugin-commonjs'));
 const {terser: rollupTerser} = require('rollup-plugin-terser');
 const {nodeResolve} = require('@rollup/plugin-node-resolve');
 const cpy = require('cpy');

@@ -19,7 +19,7 @@ function rollupPluginTypeCoerce(module) {
 }
 
 const nodeResolve = rollupPluginTypeCoerce(require('rollup-plugin-node-resolve'));
-const commonjs = rollupPluginTypeCoerce(require('rollup-plugin-commonjs'));
+const commonjs = rollupPluginTypeCoerce(require('@rollup/plugin-commonjs'));
 // @ts-expect-error: no types
 const shim = require('rollup-plugin-shim');
 const {LH_ROOT} = require('../root.js');

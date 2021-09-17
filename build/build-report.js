@@ -11,7 +11,7 @@ const {terser} = require('rollup-plugin-terser');
 // Only needed b/c getFilenamePrefix loads a commonjs module.
 const commonjs =
   // @ts-expect-error types are wrong.
-  /** @type {import('rollup-plugin-commonjs').default} */ (require('rollup-plugin-commonjs'));
+  /** @type {import('@rollup/plugin-commonjs').default} */ (require('@rollup/plugin-commonjs'));
 
 /**
  * @type {import('@rollup/plugin-typescript').default}
