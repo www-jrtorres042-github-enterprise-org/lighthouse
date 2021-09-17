@@ -205,16 +205,9 @@ export class ReportUIFeatures {
     // TODO: use await import() ?
     if (!this._swapLocaleOptions) throw new Error('must call .initSwapLocale first');
 
-    if (!window.Lighthouse || !window.Lighthouse.i18n) {
-      const script = this._document.createElement('script');
-      script.src = this._swapLocaleOptions.i18nModuleSrc;
-      this._document.body.appendChild(script);
-      await new Promise(resolve =>
-        this._document.addEventListener(
-          ReportUIFeatures.Events.lighthouseI18nModuleLoaded, resolve, {once: true}));
-    }
-
-    return window.Lighthouse.i18n;
+    /** @type {import('../../lighthouse-core/lib/i18n/i18n-module.js')} */
+    const i18nModule = await import(this._swapLocaleOptions.i18nModuleSrc);
+    return i18nModule;
   }
 
   /**

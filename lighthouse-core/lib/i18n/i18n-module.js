@@ -5,8 +5,6 @@
  */
 'use strict';
 
-module.exports = {
-  swapLocale: require('./swap-locale.js'),
-  availableLocales: ['en-US'], // Is replaced, see build-i18n.module.js
-  ...require('./i18n.js'),
-};
+module.exports = require('./i18n.js');
+module.exports.swapLocale = require('./swap-locale.js');
+module.exports.availableLocales = ['__availableLocales__']; // Is replaced, see build-i18n.module.js

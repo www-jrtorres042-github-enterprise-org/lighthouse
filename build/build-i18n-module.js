@@ -5,31 +5,63 @@
  */
 'use strict';
 
-const browserify = require('browserify');
+/**
+ * Rollup plugins don't export types that work with commonjs.
+ * @template T
+ * @param {T} module
+ * @return {T['default']}
+ */
+function rollupPluginTypeCoerce(module) {
+  // @ts-expect-error
+  return module;
+}
+
 const fs = require('fs');
 
-const distDir = `${__dirname}/../dist`;
+const rollup = require('rollup');
+const {nodeResolve} = require('@rollup/plugin-node-resolve');
+const {terser} = require('rollup-plugin-terser');
+// Only needed b/c getFilenamePrefix loads a commonjs module.
+const commonjs = rollupPluginTypeCoerce(require('rollup-plugin-commonjs'));
+const replace = rollupPluginTypeCoerce(require('rollup-plugin-replace'));
+const nodePolyfills = rollupPluginTypeCoerce(require('rollup-plugin-node-polyfills'));
+// @ts-expect-error: no types
+const shim = require('rollup-plugin-shim');
+const {LH_ROOT} = require('../root.js');
+
+const distDir = `${LH_ROOT}/dist`;
 const bundleOutFile = `${distDir}/i18n-module.js`;
 const generatorFilename = `./lighthouse-core/lib/i18n/i18n-module.js`;
 
-const localeBasenames = fs.readdirSync(__dirname + '/../lighthouse-core/lib/i18n/locales/');
+const localeBasenames = fs.readdirSync(LH_ROOT + '/lighthouse-core/lib/i18n/locales/');
 const actualLocales = localeBasenames
   .filter(basename => basename.endsWith('.json') && !basename.endsWith('.ctc.json'))
   .map(locale => locale.replace('.json', ''));
 
-browserify(generatorFilename, {standalone: 'Lighthouse.i18n'})
-  .ignore(require.resolve('../lighthouse-core/lib/i18n/locales.js'))
-  .bundle((err, src) => {
-    if (err) throw err;
-
-    const code = [
-      src.toString(),
-      // locales.js maps a locale code to a locale module. Instead of displaying
-      // every possible locale variant, which would require somehow extracting the mapping
-      // in locales.js, we only show the locales that are exactly the name of a module. This
-      // makes dynamically fetching locale files simple.
-      `Lighthouse.i18n.availableLocales = ${JSON.stringify(actualLocales)}`,
-      'document.dispatchEvent(new Event("lighthouseModuleLoaded-i18n"));',
-    ].join('\n');
-    fs.writeFileSync(bundleOutFile, code);
+async function main() {
+  const bundle = await rollup.rollup({
+    input: generatorFilename,
+    plugins: [
+      replace({
+        delimiters: ['', ''],
+        values: {
+          '[\'__availableLocales__\']': JSON.stringify(actualLocales),
+        },
+      }),
+      commonjs(),
+      nodeResolve({preferBuiltins: true}),
+      nodePolyfills(),
+      shim({
+        [require.resolve('../lighthouse-core/lib/i18n/locales.js')]: 'export default {}',
+      }),
+      // terser(),
+    ],
   });
+
+  await bundle.write({
+    file: bundleOutFile,
+    format: 'esm',
+  });
+}
+
+main();
