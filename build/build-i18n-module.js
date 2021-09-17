@@ -33,5 +33,3 @@ browserify(generatorFilename, {standalone: 'Lighthouse.i18n'})
     ].join('\n');
     fs.writeFileSync(bundleOutFile, code);
   });
-
-// TODO: terser
