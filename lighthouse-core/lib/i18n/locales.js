@@ -73,7 +73,6 @@ const files = {
 };
 
 // The keys within this const must exactly match the LH.Locale type in externs.d.ts
-// Update `fake-locale.js` when adding keys here.
 /** @type {Record<LH.Locale, LhlMessages>} */
 const locales = {
   'en-US': files['en-US'], // The 'source' strings, with descriptions
