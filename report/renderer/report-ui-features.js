@@ -39,7 +39,6 @@ function getTableRows(tableEl) {
 }
 export class ReportUIFeatures {
   static Events = {
-    lighthouseI18nModuleLoaded: 'lighthouseModuleLoaded-i18n',
     refreshLighthouseReport: 'refreshLighthouseReport',
   };
 

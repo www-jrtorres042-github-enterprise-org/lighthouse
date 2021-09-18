@@ -243,7 +243,8 @@ export class LighthouseReportViewer {
       features.initFeatures(json);
       document.addEventListener(ViewerUIFeatures.Events.refreshLighthouseReport, e => {
         // @ts-expect-error
-        this._replaceReportHtml(e.detail.newLhr);
+        const lhr = e.detail.newLhr;
+        this._replaceReportHtml(lhr);
       }, {once: true});
     } catch (e) {
       logger.error(`Error rendering report: ${e.message}`);
