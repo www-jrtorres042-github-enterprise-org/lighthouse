@@ -40,7 +40,7 @@ export class ViewerUIFeatures extends ReportUIFeatures {
       saveGistItem.setAttribute('disabled', 'true');
     }
 
-    this.initSwapLocale({
+    this.swapLocales.enable({
       i18nModuleSrc: new URL('src/i18n-module.js', location.href).href,
       async fetchData(localeModuleName) {
         const response = await fetch(`./locales/${localeModuleName}.json`);

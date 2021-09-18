@@ -22,7 +22,6 @@
  */
 
 /** @typedef {import('./dom').DOM} DOM */
-/** @typedef {import('../../lighthouse-core/lib/i18n/locales').LhlMessages} LhlMessages */
 
 import {ElementScreenshotRenderer} from './element-screenshot-renderer.js';
 import {toggleDarkTheme} from './features-util.js';
@@ -30,6 +29,7 @@ import {openTreemap} from './open-tab.js';
 import {TopbarFeatures} from './topbar-features.js';
 import {Util} from './util.js';
 import {getFilenamePrefix} from '../generator/file-namer.js';
+import { SwapLocaleFeature } from './swap-locale-feature.js';
 
 /**
  * @param {HTMLTableElement} tableEl
@@ -55,6 +55,7 @@ export class ReportUIFeatures {
     /** @type {Document} */
     this._document = this._dom.document();
     this._topbar = new TopbarFeatures(this, dom);
+    this.swapLocales = new SwapLocaleFeature(this, dom);
 
     this.onMediaQueryChange = this.onMediaQueryChange.bind(this);
   }
@@ -122,93 +123,6 @@ export class ReportUIFeatures {
       const i18nAttr = /** @type {keyof typeof Util.i18n.strings} */ (i18nKey);
       node.textContent = Util.i18n.strings[i18nAttr];
     }
-  }
-
-  /**
-   * Specifiy the URL where the i18n module script can be found, and the URLS for the locale JSON files.
-   * @param {{i18nModuleSrc: string, fetchData: (localeModuleName: string) => Promise<LhlMessages|undefined>}} options
-   */
-  async initSwapLocale(options) {
-    this._swapLocaleOptions = options;
-
-    try {
-      await this._enableSwapLocale();
-    } catch (err) {
-      // eslint-disable-next-line no-console
-      console.error('failed to enable swap locale feature', err);
-    }
-  }
-
-  async _enableSwapLocale() {
-    if (!this.json.i18n.icuMessagePaths) {
-      throw new Error('missing icuMessagePaths');
-    }
-
-    const i18nModule = await this._getI18nModule();
-    const currentLocale = this.json.configSettings.locale;
-
-    const toolsEl = this._dom.find('.lh-tools-locale', this._document);
-    const inputEl = this._dom.createChildOf(toolsEl, 'select', 'lh-locale-selector');
-    inputEl.setAttribute('type', 'text');
-    inputEl.name = 'lh-locale-list';
-
-    for (const locale of i18nModule.availableLocales) {
-      const optionEl = this._dom.createChildOf(inputEl, 'option', '');
-      optionEl.value = locale;
-      optionEl.textContent = locale;
-      if (locale === currentLocale) optionEl.selected = true;
-
-      // @ts-ignore
-      if (window.Intl && window.Intl.DisplayNames) {
-        // @ts-ignore
-        const currentLocaleDisplay = new Intl.DisplayNames([currentLocale], {type: 'language'});
-        // @ts-ignore
-        const optionLocaleDisplay = new Intl.DisplayNames([locale], {type: 'language'});
-
-        const optionLocaleName = optionLocaleDisplay.of(locale);
-        const currentLocaleName = currentLocaleDisplay.of(locale);
-        if (optionLocaleName !== currentLocaleName) {
-          optionEl.textContent = `${optionLocaleName} – ${currentLocaleName}`;
-        } else {
-          optionEl.textContent = currentLocaleName;
-        }
-      }
-    }
-
-    inputEl.addEventListener('change', () => {
-      const locale = /** @type {LH.Locale} */ (inputEl.value);
-      this._swapLocale(locale);
-    });
-  }
-
-  /**
-   * @param {LH.Locale} locale
-   */
-  async _swapLocale(locale) {
-    if (!this._swapLocaleOptions) throw new Error('must call .initSwapLocale first');
-
-    const i18nModule = await this._getI18nModule();
-    const lhlMessages = await this._swapLocaleOptions.fetchData(locale);
-    if (!lhlMessages) throw new Error(`could not fetch data for locale: ${locale}`);
-
-    // @ts-expect-error: types are messed up. rollup? maybe should convert lib/i18n is ESM first.
-    i18nModule.default.registerLocaleData(locale, lhlMessages);
-    const newLhr = i18nModule.swapLocale(this.json, locale).lhr;
-    this._refresh(newLhr);
-  }
-
-  /**
-   * The i18n module is only need for the swap-locale tool option, and is ~100KB,
-   * so it is lazily loaded. `initSwapLocale` must be called first.
-   * @return {Promise<import('../../lighthouse-core/lib/i18n/i18n-module.js')>}
-   */
-  async _getI18nModule() {
-    // TODO: use await import() ?
-    if (!this._swapLocaleOptions) throw new Error('must call .initSwapLocale first');
-
-    /** @type {import('../../lighthouse-core/lib/i18n/i18n-module.js')} */
-    const i18nModule = await import(this._swapLocaleOptions.i18nModuleSrc);
-    return i18nModule;
   }
 
   /**
