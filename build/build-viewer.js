@@ -49,7 +49,8 @@ async function run() {
       {path: 'images/**/*'},
       {path: 'manifest.json'},
       {path: '../../lighthouse-core/lib/i18n/locales/*.json', destDir: 'locales'},
-      {path: '../../dist/i18n-module.js', destDir: 'src'},
+      // Uncomment for option 1 (hacky code splitting)
+      // {path: '../../dist/i18n-module.js', destDir: 'src'},
     ],
   });
 

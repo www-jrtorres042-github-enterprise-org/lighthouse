@@ -98,12 +98,14 @@ export class SwapLocaleFeature {
    * so it is lazily loaded. `initSwapLocale` must be called first.
    */
   async _getI18nModule() {
-    // TODO: use await import() ?
     if (!this._swapLocaleOptions) throw new Error('must call .initSwapLocale first');
 
-    /** @type {import('../../lighthouse-core/lib/i18n/i18n-module.js')} */
-    const i18nModule = await import(this._swapLocaleOptions.i18nModuleSrc);
-    // const i18nModule = await import('../../lighthouse-core/lib/i18n/i18n-module.js');
+    // TODO: figure out how we want to do this.
+    // 1- load based on href given (hacky code splitting).
+    // /** @type {import('../../lighthouse-core/lib/i18n/i18n-module.js')} */
+    // const i18nModule = await import(this._swapLocaleOptions.i18nModuleSrc);
+    // 2- dynamic import, have rollup deal with it.
+    const i18nModule = await import('../../lighthouse-core/lib/i18n/i18n-module.js');
     return i18nModule;
   }
 }

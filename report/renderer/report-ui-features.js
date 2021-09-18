@@ -29,7 +29,6 @@ import {openTreemap} from './open-tab.js';
 import {TopbarFeatures} from './topbar-features.js';
 import {Util} from './util.js';
 import {getFilenamePrefix} from '../generator/file-namer.js';
-import { SwapLocaleFeature } from './swap-locale-feature.js';
 
 /**
  * @param {HTMLTableElement} tableEl
@@ -55,7 +54,6 @@ export class ReportUIFeatures {
     /** @type {Document} */
     this._document = this._dom.document();
     this._topbar = new TopbarFeatures(this, dom);
-    this.swapLocales = new SwapLocaleFeature(this, dom);
 
     this.onMediaQueryChange = this.onMediaQueryChange.bind(this);
   }

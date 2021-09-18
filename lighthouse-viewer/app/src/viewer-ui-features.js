@@ -10,6 +10,7 @@
 /** @typedef {import('../../../report/renderer/dom').DOM} DOM */
 
 import {ReportUIFeatures} from '../../../report/renderer/report-ui-features.js';
+import {SwapLocaleFeature} from '../../../report/renderer/swap-locale-feature.js';
 
 /**
  * Extends ReportUIFeatures to add an (optional) ability to save to a gist and
@@ -24,6 +25,7 @@ export class ViewerUIFeatures extends ReportUIFeatures {
     super(dom);
 
     this._saveGistCallback = saveGistCallback;
+    this._swapLocales = new SwapLocaleFeature(this, this._dom);
   }
 
   /**
@@ -40,7 +42,7 @@ export class ViewerUIFeatures extends ReportUIFeatures {
       saveGistItem.setAttribute('disabled', 'true');
     }
 
-    this.swapLocales.enable({
+    this._swapLocales.enable({
       i18nModuleSrc: new URL('src/i18n-module.js', location.href).href,
       async fetchData(localeModuleName) {
         const response = await fetch(`./locales/${localeModuleName}.json`);

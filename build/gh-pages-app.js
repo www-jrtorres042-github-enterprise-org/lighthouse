@@ -149,16 +149,30 @@ class GhPagesApp {
    * @return {Promise<string>}
    */
   async _rollupSource(input) {
-    const plugins = [
+    let plugins = [
       nodeResolve(),
       commonjs(),
     ];
+    // Option 2... use same config from build/build-i18n-module.js
+    if (input.includes('viewer')) {
+      plugins = require('./build-i18n-module.js').plugins;
+    }
     if (!process.env.DEBUG) plugins.push(rollupTerser());
+
     const bundle = await rollup.rollup({
       input,
       plugins,
     });
-    const {output} = await bundle.generate({format: 'iife'});
+    const {output} = await bundle.generate({format: 'esm'});
+
+    // Return the code from the main chunk, and save the rest to the src directory.
+    for (let i = 1; i < output.length; i++) {
+      if (output[i].type === 'chunk') {
+        // @ts-expect-error This is a chunk, not an asset.
+        const code = output[i].code;
+        safeWriteFile(`${this.distDir}/src/${output[i].fileName}`, code);
+      }
+    }
     return output[0].code;
   }
 

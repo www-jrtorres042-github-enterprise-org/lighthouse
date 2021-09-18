@@ -38,31 +38,37 @@ const actualLocales = localeBasenames
   .filter(basename => basename.endsWith('.json') && !basename.endsWith('.ctc.json'))
   .map(locale => locale.replace('.json', ''));
 
+const plugins = [
+  replace({
+    delimiters: ['', ''],
+    values: {
+      '[\'__availableLocales__\']': JSON.stringify(actualLocales),
+      '__dirname': '""',
+    },
+  }),
+  shim({
+    ['./locales.js']: 'export default {}',
+  }),
+  commonjs(),
+  nodePolyfills(),
+  nodeResolve({preferBuiltins: true}),
+  terser(),
+];
+
+// TODO: this file is for Option 1 (hacky code splitting). see `SwapLocaleFeature._getI18nModule`.
 async function main() {
   const bundle = await rollup.rollup({
     input: generatorFilename,
-    plugins: [
-      replace({
-        delimiters: ['', ''],
-        values: {
-          '[\'__availableLocales__\']': JSON.stringify(actualLocales),
-          '__dirname': '""',
-        },
-      }),
-      shim({
-        ['./locales.js']: 'export default {}',
-      }),
-      commonjs(),
-      nodePolyfills(),
-      nodeResolve(),
-      terser(),
-    ],
+    plugins,
   });
-
   await bundle.write({
     file: bundleOutFile,
     format: 'esm',
   });
 }
 
-main();
+if (require.main === module) {
+  main();
+}
+
+module.exports = {plugins};
