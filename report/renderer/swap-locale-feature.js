@@ -44,10 +44,15 @@ export class SwapLocaleFeature {
     const i18nModule = await this._getI18nModule();
     const currentLocale = this._reportUIFeatures.json.configSettings.locale;
 
-    const toolsEl = this._dom.find('.lh-tools-locale', this._dom.document());
-    const inputEl = this._dom.createChildOf(toolsEl, 'select', 'lh-locale-selector');
+    const containerEl = this._dom.find('.lh-tools-locale__selector-wrapper', this._dom.document());
+    const inputEl = this._dom.createChildOf(containerEl, 'select', 'lh-locale-selector');
     inputEl.setAttribute('type', 'text');
     inputEl.name = 'lh-locale-list';
+
+    const toggleEl = this._dom.find('.lh-tool-locale__button', this._dom.document());
+    toggleEl.addEventListener('click', () => {
+      toggleEl.classList.toggle('lh-active');
+    });
 
     for (const locale of i18nModule.availableLocales) {
       const optionEl = this._dom.createChildOf(inputEl, 'option', '');
