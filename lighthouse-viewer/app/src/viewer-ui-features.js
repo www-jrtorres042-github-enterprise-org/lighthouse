@@ -25,7 +25,13 @@ export class ViewerUIFeatures extends ReportUIFeatures {
     super(dom);
 
     this._saveGistCallback = saveGistCallback;
-    this._swapLocales = new SwapLocaleFeature(this, this._dom);
+    this._swapLocales = new SwapLocaleFeature(this, this._dom, {
+      i18nModuleSrc: new URL('src/i18n-module.js', location.href).href,
+      async fetchData(localeModuleName) {
+        const response = await fetch(`./locales/${localeModuleName}.json`);
+        return response.json();
+      },
+    });
   }
 
   /**
@@ -42,13 +48,7 @@ export class ViewerUIFeatures extends ReportUIFeatures {
       saveGistItem.setAttribute('disabled', 'true');
     }
 
-    this._swapLocales.enable({
-      i18nModuleSrc: new URL('src/i18n-module.js', location.href).href,
-      async fetchData(localeModuleName) {
-        const response = await fetch(`./locales/${localeModuleName}.json`);
-        return response.json();
-      },
-    });
+    this._swapLocales.enable();
   }
 
   /**

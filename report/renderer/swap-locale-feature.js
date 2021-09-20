@@ -15,19 +15,16 @@ export class SwapLocaleFeature {
   /**
    * @param {ReportUIFeatures} reportUIFeatures
    * @param {DOM} dom
+   * @param {{i18nModuleSrc: string, fetchData: (localeModuleName: string) => Promise<LhlMessages|undefined>}} options
+   *        Specifiy the URL where the i18n module script can be found, and the URLS for the locale JSON files.
    */
-  constructor(reportUIFeatures, dom) {
+  constructor(reportUIFeatures, dom, options) {
     this._reportUIFeatures = reportUIFeatures;
     this._dom = dom;
+    this._swapLocaleOptions = options;
   }
 
-  /**
-   * Specifiy the URL where the i18n module script can be found, and the URLS for the locale JSON files.
-   * @param {{i18nModuleSrc: string, fetchData: (localeModuleName: string) => Promise<LhlMessages|undefined>}} options
-   */
-  async enable(options) {
-    this._swapLocaleOptions = options;
-
+  async enable() {
     try {
       await this._enable();
     } catch (err) {
@@ -87,8 +84,6 @@ export class SwapLocaleFeature {
    * @param {LH.Locale} locale
    */
   async _swapLocale(locale) {
-    if (!this._swapLocaleOptions) throw new Error('must call .initSwapLocale first');
-
     const i18nModule = await this._getI18nModule();
     const lhlMessages = await this._swapLocaleOptions.fetchData(locale);
     if (!lhlMessages) throw new Error(`could not fetch data for locale: ${locale}`);
@@ -103,8 +98,6 @@ export class SwapLocaleFeature {
    * so it is lazily loaded. `initSwapLocale` must be called first.
    */
   async _getI18nModule() {
-    if (!this._swapLocaleOptions) throw new Error('must call .initSwapLocale first');
-
     // TODO: figure out how we want to do this.
     // 1- load based on href given (hacky code splitting).
     // /** @type {import('../../lighthouse-core/lib/i18n/i18n-module.js')} */
