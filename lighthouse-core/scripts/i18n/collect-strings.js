@@ -43,6 +43,7 @@ const ignoredPathComponents = [
   '**/*-renderer.js',
   '**/util-commonjs.js',
   'lighthouse-treemap/app/src/main.js',
+  'lighthouse-core/lib/i18n/i18n-module.js',
 ];
 
 /**
@@ -553,7 +554,7 @@ async function collectAllStringsInDir(dir) {
       // No UIStrings found in the file text or exports, so move to the next.
       if (!exportedUIStrings) continue;
 
-      throw new Error('UIStrings exported but no definition found');
+      throw new Error('UIStrings exported but no definition found: ' + relativeToRootPath);
     }
 
     if (!exportedUIStrings) {
