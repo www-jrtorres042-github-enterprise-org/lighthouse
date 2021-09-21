@@ -59,12 +59,13 @@ async function run() {
           },
         }),
         rollupPlugins.shim({
-          ['./locales.js']: 'export default {}',
+          './locales.js': 'export default {}',
+          // 'path': 'export default {}',
+          // 'lighthouse-logger': 'export default {}',
         }),
         rollupPlugins.commonjs(),
         rollupPlugins.nodePolyfills(),
         rollupPlugins.nodeResolve({preferBuiltins: true}),
-        rollupPlugins.terser(),
       ]},
     ],
     assets: [
