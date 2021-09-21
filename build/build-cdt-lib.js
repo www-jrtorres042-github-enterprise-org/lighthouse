@@ -34,22 +34,31 @@ for (const [inFilename, outFilename] of Object.entries(files)) {
   ];
   const methodsToRemove = [
     // Not needed.
-    // TODO: not being removed ...
     'load',
     // Not needed.
     'sourceContentProvider',
   ];
+  const variablesToRemove = [
+    'Common',
+    'CompilerSourceMappingContentProvider_js_1',
+    'i18n',
+    'i18nString',
+    'PageResourceLoader_js_1',
+    'Platform',
+    'str_',
+    'TextUtils',
+    'UIStrings',
+  ];
   const expressionsToRemove = [
-    // TODO: update this text
     /* Original:
 
-    let url = Common.ParsedURL.completeURL(this._baseURL, href) || href;
-    const source = sourceMap.sourcesContent && sourceMap.sourcesContent[i];
-    if (url === this._compiledURL && source) {
-      url += Common.UIString('? [sm]')
-    }
-    this._sourceInfos.set(url, new TextSourceMap.SourceInfo(source, null));
-    sourcesList.push(url);
+    let url = Common.ParsedURL.ParsedURL.completeURL(this.baseURL, href) || href;
+      const source = sourceMap.sourcesContent && sourceMap.sourcesContent[i];
+      if (url === this.compiledURLInternal && source) {
+        url += '? [sm]';
+      }
+      this.sourceInfos.set(url, new TextSourceMap.SourceInfo(source || null, null));
+      sourcesList.push(url);
     ----
     If a source file is the same as the compiled url and there is a sourcesContent,
     then `entry.sourceURL` (what is returned from .mappings) will have `? [sm]` appended.
@@ -58,8 +67,6 @@ for (const [inFilename, outFilename] of Object.entries(files)) {
     counts, and is further used in the details to specify a file within a source map.
     */
     `url += '? [sm]'`,
-    // Delete all the export statements.
-    // 'exports.',
   ];
   // Complicated expressions are hard detect with the TS lib, so instead work with the raw code.
   const rawCodeToReplace = {
@@ -67,16 +74,7 @@ for (const [inFilename, outFilename] of Object.entries(files)) {
     // Similar to the reason for removing `url += Common.UIString('? [sm]')`.
     // The entries in `.mappings` should not have their url property modified.
     'Common.ParsedURL.ParsedURL.completeURL(this.baseURL, href)': `''`,
-    // Delete all the requires.
-    'const TextUtils = require("../../models/text_utils/text_utils.js");': '',
-    'const Common = require("../common/common.js");': '',
-    'const i18n = require("../i18n/i18n.js");': '',
-    'const Platform = require("../platform/platform.js");': '',
-    // eslint-disable-next-line max-len
-    'const CompilerSourceMappingContentProvider_js_1 = require("./CompilerSourceMappingContentProvider.js");': '',
-    'const PageResourceLoader_js_1 = require("./PageResourceLoader.js");': '',
-    //
-    'const str_ = i18n.i18n.registerUIStrings(\'core/sdk/SourceMap.ts\', UIStrings);': '',
+    // Replace i18n function with a very simple templating function.
     'i18n.i18n.getLocalizedString.bind(undefined, str_)': (
       /** @param {string} template @param {object} vars */
       function(template, vars) {
@@ -92,12 +90,13 @@ for (const [inFilename, outFilename] of Object.entries(files)) {
   const codeFragments = [
     ...classesToRemove,
     ...methodsToRemove,
+    ...variablesToRemove,
     ...expressionsToRemove,
     ...Object.keys(rawCodeToReplace),
   ];
   for (const codeFragment of codeFragments) {
     if (!codeTranspiledToCommonJS.includes(codeFragment)) {
-      // throw new Error(`did not find expected code fragment: ${codeFragment}`);
+      throw new Error(`did not find expected code fragment: ${codeFragment}`);
     }
   }
 
@@ -124,6 +123,13 @@ for (const [inFilename, outFilename] of Object.entries(files)) {
         if (expressionsToRemove.some(className => asString.includes(className))) {
           removeNode = true;
         }
+      }
+
+      if (ts.isVariableDeclarationList(node) && node.declarations.length === 1) {
+        // @ts-expect-error: is read-only, but whatever.
+        node.declarations =
+          node.declarations.filter(d => !variablesToRemove.includes(d.name.getText()));
+        if (node.declarations.length === 0) removeNode = true;
       }
 
       if (removeNode) {

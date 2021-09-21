@@ -33,34 +33,15 @@ const Platform = require('../Platform.js');
  */
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.TextSourceMap = exports.SourceMapEntry = exports.Offset = exports.Section = exports.SourceMapV3 = void 0;
-
-
-
-
-
-
-const UIStrings = {
-    /**
-    *@description Error message when failing to load a source map text via the network
-    *@example {https://example.com/sourcemap.map} PH1
-    *@example {A certificate error occurred} PH2
-    */
-    couldNotLoadContentForSS: 'Could not load content for {PH1}: {PH2}',
-    /**
-    *@description Error message when failing to load a script source text via the network
-    *@example {https://example.com} PH1
-    *@example {Unexpected token} PH2
-    */
-    couldNotParseContentForSS: 'Could not parse content for {PH1}: {PH2}',
-};
-
-const i18nString = function(template, vars) {
-        let result = template;
-        for (const [key, value] of Object.entries(vars)) {
-          result = result.replace(new RegExp('{' + key + '}'), value);
-        }
-        return result;
-      };
+;
+;
+;
+;
+;
+;
+;
+;
+;
 class SourceMapV3 {
     constructor() {
     }
