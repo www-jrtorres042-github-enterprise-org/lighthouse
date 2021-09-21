@@ -12,7 +12,7 @@ const SDK = {
 // @ts-expect-error
 SDK.TextSourceMap.prototype.computeLastGeneratedColumns = function() {
   const mappings = this.mappings();
-  if (mappings.length && typeof mappings[0].lastColumnNumber !== 'undefined') return;
+  if (mappings.length && mappings[0].lastColumnNumber !== undefined) return;
 
   for (let i = 0; i < mappings.length - 1; i++) {
     const mapping = mappings[i];
@@ -21,6 +21,8 @@ SDK.TextSourceMap.prototype.computeLastGeneratedColumns = function() {
       mapping.lastColumnNumber = nextMapping.columnNumber;
     }
   }
+
+  // Now, all but the last mapping on each line will have 'lastColumnNumber' set to a number.
 };
 
 module.exports = SDK;

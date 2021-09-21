@@ -149,7 +149,8 @@ class TextSourceMap {
         }
         return mappings.slice(startIndex, endIndex);
     }
-    mappings() {
+    /** @return {Array<{lineNumber: number, columnNumber: number, sourceURL?: string, sourceLineNumber, sourceColumnNumber: number, name?: string, lastColumnNumber?: number}>} */
+mappings() {
         if (this.mappingsInternal === null) {
             this.mappingsInternal = [];
             this.eachSection(this.parseMap.bind(this));

@@ -84,6 +84,9 @@ for (const [inFilename, outFilename] of Object.entries(files)) {
         }
         return result;
       }).toString(),
+    // Add some types.
+    // eslint-disable-next-line max-len
+    'mappings() {': '/** @return {Array<{lineNumber: number, columnNumber: number, sourceURL?: string, sourceLineNumber, sourceColumnNumber: number, name?: string, lastColumnNumber?: number}>} */\nmappings() {',
   };
 
   // Verify that all the above code is present.
@@ -147,9 +150,6 @@ for (const [inFilename, outFilename] of Object.entries(files)) {
 
   for (const [code, replacement] of Object.entries(rawCodeToReplace)) {
     sourceFilePrinted = sourceFilePrinted.replace(code, replacement);
-    if (sourceFilePrinted.includes(code)) {
-      throw new Error(`expected only one occurrence for: ${code}`);
-    }
   }
 
   const modifiedFile = [
