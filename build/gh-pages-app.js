@@ -8,11 +8,7 @@
 const fs = require('fs');
 const path = require('path');
 const rollup = require('rollup');
-const commonjs =
-  // @ts-expect-error types are wrong.
-  /** @type {import('@rollup/plugin-commonjs').default} */ (require('@rollup/plugin-commonjs'));
-const {terser: rollupTerser} = require('rollup-plugin-terser');
-const {nodeResolve} = require('@rollup/plugin-node-resolve');
+const rollupPlugins = require('./rollup-plugins.js');
 const cpy = require('cpy');
 const ghPages = require('gh-pages');
 const glob = require('glob');
@@ -41,7 +37,7 @@ const license = `/*
 /**
  * Literal string (representing JS, CSS, etc...), or an object with a path, which would
  * be interpreted relative to opts.appDir and be glob-able.
- * @typedef {{path: string, rollup?: boolean} | string} Source
+ * @typedef {{path: string, rollup?: boolean, rollupPlugins?: rollup.Plugin[]} | string} Source
  */
 
 /**
@@ -146,18 +142,15 @@ class GhPagesApp {
 
   /**
    * @param {string} input
+   * @param {rollup.Plugin[]=} plugins
    * @return {Promise<string>}
    */
-  async _rollupSource(input) {
-    let plugins = [
-      nodeResolve(),
-      commonjs(),
+  async _rollupSource(input, plugins) {
+    plugins = plugins || [
+      rollupPlugins.nodeResolve(),
+      rollupPlugins.commonjs(),
     ];
-    // Option 2... use same config from build/build-i18n-module.js
-    if (input.includes('viewer')) {
-      plugins = require('./build-i18n-module.js').plugins;
-    }
-    if (!process.env.DEBUG) plugins.push(rollupTerser());
+    if (!process.env.DEBUG) plugins.push(rollupPlugins.terser());
 
     const bundle = await rollup.rollup({
       input,

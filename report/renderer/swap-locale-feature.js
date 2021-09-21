@@ -15,7 +15,7 @@ export class SwapLocaleFeature {
   /**
    * @param {ReportUIFeatures} reportUIFeatures
    * @param {DOM} dom
-   * @param {{i18nModuleSrc: string, fetchData: (localeModuleName: string) => Promise<LhlMessages|undefined>}} options
+   * @param {{fetchData: (localeModuleName: string) => Promise<LhlMessages|undefined>}} options
    *        Specifiy the URL where the i18n module script can be found, and the URLS for the locale JSON files.
    */
   constructor(reportUIFeatures, dom, options) {

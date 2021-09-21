@@ -5,28 +5,10 @@
  */
 'use strict';
 
-/**
- * Rollup plugins don't export types that work with commonjs.
- * @template T
- * @param {T} module
- * @return {T['default']}
- */
-function rollupPluginTypeCoerce(module) {
-  // @ts-expect-error
-  return module;
-}
-
 const fs = require('fs');
 
 const rollup = require('rollup');
-const {nodeResolve} = require('@rollup/plugin-node-resolve');
-const {terser} = require('rollup-plugin-terser');
-// Only needed b/c getFilenamePrefix loads a commonjs module.
-const commonjs = rollupPluginTypeCoerce(require('@rollup/plugin-commonjs'));
-const replace = rollupPluginTypeCoerce(require('rollup-plugin-replace'));
-const nodePolyfills = rollupPluginTypeCoerce(require('rollup-plugin-polyfill-node'));
-// @ts-expect-error: no types
-const shim = require('rollup-plugin-shim');
+const rollupPlugins = require('./rollup-plugins.js');
 const {LH_ROOT} = require('../root.js');
 
 const distDir = `${LH_ROOT}/dist`;
@@ -39,20 +21,20 @@ const actualLocales = localeBasenames
   .map(locale => locale.replace('.json', ''));
 
 const plugins = [
-  replace({
+  rollupPlugins.replace({
     delimiters: ['', ''],
     values: {
       '[\'__availableLocales__\']': JSON.stringify(actualLocales),
       '__dirname': '""',
     },
   }),
-  shim({
+  rollupPlugins.shim({
     ['./locales.js']: 'export default {}',
   }),
-  commonjs(),
-  nodePolyfills(),
-  nodeResolve({preferBuiltins: true}),
-  terser(),
+  rollupPlugins.commonjs(),
+  rollupPlugins.nodePolyfills(),
+  rollupPlugins.nodeResolve({preferBuiltins: true}),
+  rollupPlugins.terser(),
 ];
 
 // TODO: this file is for Option 1 (hacky code splitting). see `SwapLocaleFeature._getI18nModule`.

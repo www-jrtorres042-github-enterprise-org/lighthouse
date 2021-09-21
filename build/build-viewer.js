@@ -5,11 +5,18 @@
  */
 'use strict';
 
+const fs = require('fs');
 const browserify = require('browserify');
+const rollupPlugins = require('./rollup-plugins.js');
 const GhPagesApp = require('./gh-pages-app.js');
 const {minifyFileTransform} = require('./build-utils.js');
 const htmlReportAssets = require('../report/generator/report-assets.js');
 const {LH_ROOT} = require('../root.js');
+
+const localeBasenames = fs.readdirSync(LH_ROOT + '/lighthouse-core/lib/i18n/locales/');
+const actualLocales = localeBasenames
+  .filter(basename => basename.endsWith('.json') && !basename.endsWith('.ctc.json'))
+  .map(locale => locale.replace('.json', ''));
 
 /**
  * Build viewer, optionally deploying to gh-pages if `--deploy` flag was set.
@@ -43,14 +50,27 @@ async function run() {
     javascripts: [
       await generatorJsPromise,
       {path: require.resolve('pako/dist/pako_inflate.js')},
-      {path: 'src/main.js', rollup: true},
+      {path: 'src/main.js', rollup: true, rollupPlugins: [
+        rollupPlugins.replace({
+          delimiters: ['', ''],
+          values: {
+            '[\'__availableLocales__\']': JSON.stringify(actualLocales),
+            '__dirname': '""',
+          },
+        }),
+        rollupPlugins.shim({
+          ['./locales.js']: 'export default {}',
+        }),
+        rollupPlugins.commonjs(),
+        rollupPlugins.nodePolyfills(),
+        rollupPlugins.nodeResolve({preferBuiltins: true}),
+        rollupPlugins.terser(),
+      ]},
     ],
     assets: [
       {path: 'images/**/*'},
       {path: 'manifest.json'},
       {path: '../../lighthouse-core/lib/i18n/locales/*.json', destDir: 'locales'},
-      // Uncomment for option 1 (hacky code splitting)
-      // {path: '../../dist/i18n-module.js', destDir: 'src'},
     ],
   });
 
