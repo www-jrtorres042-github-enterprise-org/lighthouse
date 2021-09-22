@@ -11,7 +11,6 @@
   --double-base-spacing: calc(var(--base-spacing) * 2);
   --gather-mode-icon-size: 16px;
   --half-base-spacing: calc(var(--base-spacing) / 2);
-  --hover-highlight-color: var(--color-gray-100);
   --separator-color: var(--color-gray-300);
   --sidebar-flow-step-navigation-font-size: 14px;
   --sidebar-selected-bg-color: #DDEEFF;
@@ -95,9 +94,6 @@
   outline: inherit;
   font-size: var(--topbar-button-font-size);
   margin-right: var(--base-spacing);
-}
-.TopbarButton:hover {
-  background-color: var(--hover-highlight-color);
 }
 
 .Topbar__logo {
@@ -341,7 +337,7 @@
 }
 .SummaryCategory__content:hover,
 .SummaryCategory__content:focus-within {
-  background-color: var(--hover-highlight-color);
+  background-color: var(--color-gray-100);
 }
 .SummaryCategory__content:hover .SummaryTooltip,
 .SummaryCategory__content:focus-within .SummaryTooltip {
