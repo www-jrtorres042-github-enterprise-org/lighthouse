@@ -72,7 +72,7 @@ export function downloadFile(blob: Blob, filename: string) {
   const ext = blob.type.match('json') ? '.json' : '.html';
 
   const a = document.createElement('a');
-  a.download = `${filename}${ext}`;
+  a.download = filename.concat(ext);
   a.href = URL.createObjectURL(blob);
   document.body.appendChild(a); // Firefox requires anchor to be in the DOM.
   console.log(a);
