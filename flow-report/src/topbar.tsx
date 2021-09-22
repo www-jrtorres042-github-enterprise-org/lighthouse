@@ -7,6 +7,21 @@
 import {FunctionComponent, JSX} from 'preact';
 
 import {HamburgerIcon} from './icons';
+import {computeFilename, downloadFile, useFlowResult} from './util';
+
+function saveHtml(flowResult: LH.FlowResult) {
+  const htmlStr = document.documentElement.outerHTML;
+  const blob = new Blob([htmlStr], {type: 'text/html'});
+  const filename = computeFilename(flowResult);
+  downloadFile(blob, filename);
+}
+
+function saveJson(flowResult: LH.FlowResult) {
+  const jsonStr = JSON.stringify(flowResult);
+  const blob = new Blob([jsonStr], {type: 'application/json'});
+  const filename = computeFilename(flowResult);
+  downloadFile(blob, filename);
+}
 
 /* eslint-disable max-len */
 const Logo: FunctionComponent = () => {
@@ -53,11 +68,9 @@ const TopbarButton: FunctionComponent<{onClick: JSX.MouseEventHandler<HTMLButton
   );
 };
 
-export const Topbar: FunctionComponent<{
-  onMenuClick: JSX.MouseEventHandler<HTMLButtonElement>
-  onPrintClick: JSX.MouseEventHandler<HTMLButtonElement>
-  onSaveClick: JSX.MouseEventHandler<HTMLButtonElement>
-}> = ({onMenuClick, onPrintClick, onSaveClick}) => {
+export const Topbar: FunctionComponent<{onMenuClick: JSX.MouseEventHandler<HTMLButtonElement>}> =
+({onMenuClick}) => {
+  const flowResult = useFlowResult();
   return (
     <div className="Topbar">
       <TopbarButton onClick={onMenuClick}>
@@ -67,8 +80,9 @@ export const Topbar: FunctionComponent<{
         <Logo/>
       </div>
       <div className="Topbar__title">Lighthouse User Flow Report</div>
-      <TopbarButton onClick={onPrintClick}>Print</TopbarButton>
-      <TopbarButton onClick={onSaveClick}>Save</TopbarButton>
+      <TopbarButton onClick={() => window.print()}>Print</TopbarButton>
+      <TopbarButton onClick={() => saveHtml(flowResult)}>Save</TopbarButton>
+      <TopbarButton onClick={() => saveJson(flowResult)}>Save JSON</TopbarButton>
     </div>
   );
 };
