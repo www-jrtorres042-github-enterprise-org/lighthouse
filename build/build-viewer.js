@@ -67,7 +67,7 @@ async function run() {
       ]},
     ],
     assets: [
-      {path: 'images/**/*'},
+      {path: 'images/**/*', destDir: 'images'},
       {path: 'manifest.json'},
       {path: '../../lighthouse-core/lib/i18n/locales/*.json', destDir: 'locales'},
     ],

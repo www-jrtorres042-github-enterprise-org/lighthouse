@@ -98,7 +98,6 @@ class GhPagesApp {
       const dir = destDir ? `${this.distDir}/${destDir}` : this.distDir;
       await cpy(path, dir, {
         cwd: this.opts.appDir,
-        parents: !destDir,
         rename,
       });
     }

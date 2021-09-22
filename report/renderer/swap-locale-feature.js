@@ -42,9 +42,8 @@ export class SwapLocaleFeature {
     const currentLocale = this._reportUIFeatures.json.configSettings.locale;
 
     const containerEl = this._dom.find('.lh-tools-locale__selector-wrapper', this._dom.document());
-    const inputEl = this._dom.createChildOf(containerEl, 'select', 'lh-locale-selector');
-    inputEl.setAttribute('type', 'text');
-    inputEl.name = 'lh-locale-list';
+    const selectEl = this._dom.createChildOf(containerEl, 'select', 'lh-locale-selector');
+    selectEl.name = 'lh-locale-list';
 
     const toggleEl = this._dom.find('.lh-tool-locale__button', this._dom.document());
     toggleEl.addEventListener('click', () => {
@@ -52,16 +51,16 @@ export class SwapLocaleFeature {
     });
 
     for (const locale of i18nModule.availableLocales) {
-      const optionEl = this._dom.createChildOf(inputEl, 'option', '');
+      const optionEl = this._dom.createChildOf(selectEl, 'option', '');
       optionEl.value = locale;
       optionEl.textContent = locale;
       if (locale === currentLocale) optionEl.selected = true;
 
-      // @ts-ignore
-      if (window.Intl && window.Intl.DisplayNames) {
-        // @ts-ignore
+      // @ts-expect-error
+      if (window.Intl && Intl.DisplayNames) {
+        // @ts-expect-error
         const currentLocaleDisplay = new Intl.DisplayNames([currentLocale], {type: 'language'});
-        // @ts-ignore
+        // @ts-expect-error
         const optionLocaleDisplay = new Intl.DisplayNames([locale], {type: 'language'});
 
         const optionLocaleName = optionLocaleDisplay.of(locale);
@@ -74,8 +73,8 @@ export class SwapLocaleFeature {
       }
     }
 
-    inputEl.addEventListener('change', () => {
-      const locale = /** @type {LH.Locale} */ (inputEl.value);
+    selectEl.addEventListener('change', () => {
+      const locale = /** @type {LH.Locale} */ (selectEl.value);
       this._swapLocale(locale);
     });
   }

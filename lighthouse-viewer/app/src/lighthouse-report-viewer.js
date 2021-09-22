@@ -241,11 +241,13 @@ export class LighthouseReportViewer {
 
       const features = new ViewerUIFeatures(dom, saveCallback);
       features.initFeatures(json);
-      document.addEventListener(ViewerUIFeatures.Events.refreshLighthouseReport, e => {
-        // @ts-expect-error
-        const lhr = e.detail.newLhr;
-        this._replaceReportHtml(lhr);
-      }, {once: true});
+
+      /** @param {Event & {detail?: {newLhr: LH.Result}}} e */
+      const onRefresh = e => {
+        if (e.detail) this._replaceReportHtml(e.detail.newLhr);
+      };
+      document.addEventListener(
+        ViewerUIFeatures.Events.refreshLighthouseReport, onRefresh, {once: true});
     } catch (e) {
       logger.error(`Error rendering report: ${e.message}`);
       container.textContent = '';
