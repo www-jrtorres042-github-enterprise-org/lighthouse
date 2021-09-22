@@ -49,7 +49,7 @@ export function getScreenshot(reportResult: LH.ReportResult) {
 }
 
 export function computeFilename(flowResult: LH.FlowResult) {
-  const lhr = flowResult.lhrs[0];
+  const lhr = flowResult.steps[0].lhr;
   const date = (lhr.fetchTime && new Date(lhr.fetchTime)) || new Date();
 
   const timeStr = date.toLocaleTimeString('en-US', {hour12: false});
