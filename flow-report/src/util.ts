@@ -60,8 +60,10 @@ export function computeFilename(flowResult: LH.FlowResult) {
   dateParts.unshift(dateParts.pop());
   const dateStr = dateParts.join('-');
 
+  const name = flowResult.name.replace(/\s/g, '-');
+
   // TODO: Replace "flow" with provided flow name.
-  const filenamePrefix = `flow_${dateStr}_${timeStr}`;
+  const filenamePrefix = `${name}_${dateStr}_${timeStr}`;
   // replace characters that are unfriendly to filenames
   return filenamePrefix.replace(/[/?<>\\:*|"]/g, '-');
 }

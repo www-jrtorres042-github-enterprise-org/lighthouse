@@ -9,8 +9,10 @@ const {generateFlowReportHtml} = require('../../report/generator/report-generato
 const {navigation, startTimespan, snapshot} = require('./api.js');
 
 /** @typedef {Parameters<snapshot>[0]} FrOptions */
-/** @typedef {Omit<FrOptions, 'page'>} UserFlowOptions */
-/** @typedef {UserFlowOptions & {stepName?: string}} StepOptions */
+/** @typedef {Omit<FrOptions, 'page'> & {name?: string}} UserFlowOptions */
+/** @typedef {Omit<FrOptions, 'page'> & {stepName?: string}} StepOptions */
+
+const DEFAULT_FLOW_NAME = 'User flow';
 
 class UserFlow {
   /**
@@ -20,6 +22,8 @@ class UserFlow {
   constructor(page, options) {
     /** @type {FrOptions} */
     this.options = {page, ...options};
+    /** @type {string} */
+    this.name = (options && options.name) || DEFAULT_FLOW_NAME;
     /** @type {LH.FlowResult.Step[]} */
     this.steps = [];
   }
@@ -120,7 +124,7 @@ class UserFlow {
    * @return {LH.FlowResult}
    */
   getFlowResult() {
-    return {steps: this.steps};
+    return {steps: this.steps, name: this.name};
   }
 
   /**
