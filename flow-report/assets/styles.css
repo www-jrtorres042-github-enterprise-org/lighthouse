@@ -44,10 +44,6 @@
 }
 
 @media print {
-  @page {
-    size: landscape;
-  }
-
   .App {
     grid-template-rows: 0px auto !important;
     grid-template-columns: 0px auto !important;
@@ -66,11 +62,7 @@
   }
 
   .SummaryFlow {
-    grid-template-columns: 0px min-content min-content min-content min-content min-content min-content !important;
-  }
-
-  .SummaryFlowStep__screenshot {
-    display: none !important;
+    grid-template-columns: repeat(7, min-content) !important;
   }
 }
 
@@ -276,7 +268,7 @@
   max-width: max-content;
   display: grid;
   grid-auto-rows: min-content;
-  grid-template-columns: min-content min-content 4fr 1fr 1fr 1fr 1fr;
+  grid-template-columns: min-content min-content minmax(var(--gauge-circle-size), 4fr) 1fr 1fr 1fr 1fr;
   align-items: center;
   margin: var(--base-spacing) 0px;
 }
@@ -327,6 +319,7 @@
 .SummaryFlowStep__label {
   grid-column: 3;
   margin: var(--half-base-spacing);
+  overflow-x: hidden;
 }
 
 .SummaryFlowStep__mode {
