@@ -75,7 +75,6 @@
 }
 
 .TopbarButton {
-  padding: var(--half-base-spacing);
   height: var(--topbar-button-size);
   min-width: var(--topbar-button-size);
   cursor: pointer;
