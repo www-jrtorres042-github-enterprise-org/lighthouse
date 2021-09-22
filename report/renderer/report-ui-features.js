@@ -38,10 +38,6 @@ function getTableRows(tableEl) {
   return Array.from(tableEl.tBodies[0].rows);
 }
 export class ReportUIFeatures {
-  static Events = {
-    refreshLighthouseReport: 'refreshLighthouseReport',
-  };
-
   /**
    * @param {DOM} dom
    */
@@ -348,17 +344,5 @@ export class ReportUIFeatures {
     // cleanup.
     this._document.body.removeChild(a);
     setTimeout(() => URL.revokeObjectURL(a.href), 500);
-  }
-
-  /**
-   * @param {LH.Result=} newLhr
-   */
-  _refresh(newLhr) {
-    this._document.dispatchEvent(new CustomEvent(ReportUIFeatures.Events.refreshLighthouseReport, {
-      detail: {
-        features: this,
-        newLhr,
-      },
-    }));
   }
 }

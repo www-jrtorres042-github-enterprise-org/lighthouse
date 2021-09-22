@@ -19,17 +19,18 @@ import {SwapLocaleFeature} from '../../../report/renderer/swap-locale-feature.js
 export class ViewerUIFeatures extends ReportUIFeatures {
   /**
    * @param {DOM} dom
-   * @param {?function(LH.Result): void} saveGistCallback
+   * @param {{saveGist?: function(LH.Result): void, refresh: function(LH.Result): void}} callbacks
    */
-  constructor(dom, saveGistCallback) {
+  constructor(dom, callbacks) {
     super(dom);
 
-    this._saveGistCallback = saveGistCallback;
+    this._callbacks = callbacks;
     this._swapLocales = new SwapLocaleFeature(this, this._dom, {
       async fetchData(localeModuleName) {
         const response = await fetch(`./locales/${localeModuleName}.json`);
         return response.json();
       },
+      refresh: callbacks.refresh,
     });
   }
 
@@ -41,7 +42,7 @@ export class ViewerUIFeatures extends ReportUIFeatures {
     super.initFeatures(report);
 
     // Disable option to save as gist if no callback for saving.
-    if (!this._saveGistCallback) {
+    if (!this._callbacks.saveGist) {
       const saveGistItem =
         this._dom.find('.lh-tools__dropdown a[data-action="save-gist"]', this._document);
       saveGistItem.setAttribute('disabled', 'true');
@@ -63,8 +64,8 @@ export class ViewerUIFeatures extends ReportUIFeatures {
    * @override
    */
   saveAsGist() {
-    if (this._saveGistCallback) {
-      this._saveGistCallback(this.json);
+    if (this._callbacks.saveGist) {
+      this._callbacks.saveGist(this.json);
     } else {
       // UI should prevent this from being called with no callback, but throw to be sure.
       throw new Error('Cannot save this report as a gist');
