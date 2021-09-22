@@ -56,7 +56,9 @@ export class SwapLocaleFeature {
       optionEl.textContent = locale;
       if (locale === currentLocale) optionEl.selected = true;
 
-      // @ts-expect-error
+      // @ts-expect-error: waiting for typescript 4.5. Might need to add "ES2020.Intl"
+      // to tsconfig libs.
+      // https://github.com/microsoft/TypeScript/pull/44022#issuecomment-915087098
       if (window.Intl && Intl.DisplayNames) {
         // @ts-expect-error
         const currentLocaleDisplay = new Intl.DisplayNames([currentLocale], {type: 'language'});
@@ -93,16 +95,10 @@ export class SwapLocaleFeature {
   }
 
   /**
-   * The i18n module is only need for the swap-locale tool option, and is ~100KB,
-   * so it is lazily loaded. `initSwapLocale` must be called first.
+   * The i18n module is only need for the swap-locale tool option, and is ~80KB,
+   * so it is lazily loaded.
    */
-  async _getI18nModule() {
-    // TODO: figure out how we want to do this.
-    // 1- load based on href given (hacky code splitting).
-    // /** @type {import('../../lighthouse-core/lib/i18n/i18n-module.js')} */
-    // const i18nModule = await import(this._swapLocaleOptions.i18nModuleSrc);
-    // 2- dynamic import, have rollup deal with it.
-    const i18nModule = await import('../../lighthouse-core/lib/i18n/i18n-module.js');
-    return i18nModule;
+  _getI18nModule() {
+    return import('../../lighthouse-core/lib/i18n/i18n-module.js');
   }
 }
