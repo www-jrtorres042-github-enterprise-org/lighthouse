@@ -6,14 +6,19 @@
 
 import {FunctionComponent, JSX} from 'preact';
 
+import {getFilenamePrefix} from '../../report/generator/file-namer';
 import {HamburgerIcon} from './icons';
-import {computeFilename, downloadFile, useFlowResult} from './util';
+import {downloadFile, useFlowResult} from './util';
 
 function saveHtml(flowResult: LH.FlowResult) {
   const htmlStr = document.documentElement.outerHTML;
   const blob = new Blob([htmlStr], {type: 'text/html'});
-  const filename = computeFilename(flowResult);
-  downloadFile(blob, filename);
+
+  const lhr = flowResult.steps[0].lhr;
+  const name = flowResult.name.replace(/\s/g, '-');
+  const filenamePrefix = getFilenamePrefix(name, lhr.fetchTime);
+
+  downloadFile(blob, filenamePrefix);
 }
 
 /* eslint-disable max-len */

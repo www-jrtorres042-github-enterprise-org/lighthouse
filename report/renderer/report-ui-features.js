@@ -28,7 +28,7 @@ import {toggleDarkTheme} from './features-util.js';
 import {openTreemap} from './open-tab.js';
 import {TopbarFeatures} from './topbar-features.js';
 import {Util} from './util.js';
-import {getFilenamePrefix} from '../generator/file-namer.js';
+import {getLhrFilenamePrefix} from '../generator/file-namer.js';
 
 /**
  * @param {HTMLTableElement} tableEl
@@ -328,7 +328,7 @@ export class ReportUIFeatures {
    * @param {Blob|File} blob The file to save.
    */
   _saveFile(blob) {
-    const filename = getFilenamePrefix({
+    const filename = getLhrFilenamePrefix({
       finalUrl: this.json.finalUrl,
       fetchTime: this.json.fetchTime,
     });

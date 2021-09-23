@@ -8,7 +8,7 @@
 const rollup = require('rollup');
 const {nodeResolve} = require('@rollup/plugin-node-resolve');
 const {terser} = require('rollup-plugin-terser');
-// Only needed b/c getFilenamePrefix loads a commonjs module.
+// Only needed b/c getFilenamePrefix/getLhrFilenamePrefix loads a commonjs module.
 const commonjs =
   // @ts-expect-error types are wrong.
   /** @type {import('rollup-plugin-commonjs').default} */ (require('rollup-plugin-commonjs'));
