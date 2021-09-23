@@ -63,7 +63,7 @@ const Logo: FunctionComponent = () => {
 const TopbarButton: FunctionComponent<{onClick: JSX.MouseEventHandler<HTMLButtonElement>}> =
 ({onClick, children}) => {
   return (
-    <button className="TopbarButton" onClick={onClick}>
+    <button className="TopbarButton" onClick={onClick} data-testid="TopbarButton">
       {children}
     </button>
   );

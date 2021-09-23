@@ -33,7 +33,7 @@ export const App: FunctionComponent<{flowResult: LH.FlowResult}> = ({flowResult}
   return (
     <FlowResultContext.Provider value={flowResult}>
       <ReportRendererProvider>
-        <div className={classNames('App', {'App--collapsed': collapsed})}>
+        <div className={classNames('App', {'App--collapsed': collapsed})} data-testid="App">
           <Topbar onMenuClick={() => setCollapsed(c => !c)}/>
           <Sidebar/>
           <Content/>

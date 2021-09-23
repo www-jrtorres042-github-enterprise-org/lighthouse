@@ -8,7 +8,7 @@ import fs from 'fs';
 import {dirname} from 'path';
 import {fileURLToPath} from 'url';
 
-import {render} from '@testing-library/preact';
+import {act, render} from '@testing-library/preact';
 
 import {App} from '../src/app';
 
@@ -45,4 +45,21 @@ it('renders the snapshot step', async () => {
   const root = render(<App flowResult={flowResult}/>);
 
   expect(root.getByTestId('Report')).toBeTruthy();
+});
+
+it('toggles collapsed mode when hamburger button clicked', async () => {
+  const root = render(<App flowResult={flowResult}/>);
+
+  const app = root.getByTestId('App');
+  const topbarButtons = root.getAllByTestId('TopbarButton');
+  const hamburgerButton = topbarButtons[0];
+
+  expect(hamburgerButton.innerHTML).toMatch(/<svg.*<\/svg>/);
+  expect(app.classList).not.toContain('App--collapsed');
+
+  await act(() => {
+    hamburgerButton.click();
+  });
+
+  expect(app.classList).toContain('App--collapsed');
 });
