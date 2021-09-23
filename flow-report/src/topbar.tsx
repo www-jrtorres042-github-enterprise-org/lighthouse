@@ -5,9 +5,11 @@
  */
 
 import {FunctionComponent, JSX} from 'preact';
+import {useEffect} from 'preact/hooks';
 
 import {HamburgerIcon} from './icons';
 import {computeFilename, downloadFile, useFlowResult} from './util';
+import {useReportRenderer} from './wrappers/report-renderer';
 
 function saveHtml(flowResult: LH.FlowResult) {
   const htmlStr = document.documentElement.outerHTML;
@@ -71,6 +73,23 @@ const TopbarButton: FunctionComponent<{onClick: JSX.MouseEventHandler<HTMLButton
 export const Topbar: FunctionComponent<{onMenuClick: JSX.MouseEventHandler<HTMLButtonElement>}> =
 ({onMenuClick}) => {
   const flowResult = useFlowResult();
+  const {reportUIFeatures} = useReportRenderer();
+
+  useEffect(() => {
+    reportUIFeatures._topbar.installAfterPrintListener();
+    return () => reportUIFeatures._topbar.uninstallAfterPrintListener();
+  });
+
+  function print() {
+    reportUIFeatures._topbar.collapseAllDetails();
+    window.print();
+  }
+
+  function printExpaned() {
+    reportUIFeatures._topbar.expandAllDetails();
+    window.print();
+  }
+
   return (
     <div className="Topbar">
       <TopbarButton onClick={onMenuClick}>
@@ -80,7 +99,8 @@ export const Topbar: FunctionComponent<{onMenuClick: JSX.MouseEventHandler<HTMLB
         <Logo/>
       </div>
       <div className="Topbar__title">Lighthouse User Flow Report</div>
-      <TopbarButton onClick={() => window.print()}>Print</TopbarButton>
+      <TopbarButton onClick={print}>Print</TopbarButton>
+      <TopbarButton onClick={printExpaned}>Print Expanded</TopbarButton>
       <TopbarButton onClick={() => saveHtml(flowResult)}>Save</TopbarButton>
       <TopbarButton onClick={() => saveJson(flowResult)}>Save JSON</TopbarButton>
     </div>
