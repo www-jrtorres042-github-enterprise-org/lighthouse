@@ -75,7 +75,6 @@ export function downloadFile(blob: Blob, filename: string) {
   a.download = filename.concat(ext);
   a.href = URL.createObjectURL(blob);
   document.body.appendChild(a); // Firefox requires anchor to be in the DOM.
-  console.log(a);
   a.click();
 
   // cleanup.
