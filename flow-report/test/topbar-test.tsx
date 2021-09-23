@@ -43,12 +43,7 @@ it('save button opens save dialog for HTML file', async () => {
   saveButton.click();
 
   expect(mockSaveFile).toHaveBeenCalledWith(
-    {
-      args: [
-        [expect.stringMatching(/<html>.*<\/html>/)],
-        {type: 'text/html'},
-      ],
-    },
+    expect.any(Blob),
     'User-flow_2021-09-14_22-24-22'
   );
 });
