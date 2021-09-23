@@ -106,7 +106,7 @@ export class TopbarFeatures {
       case 'save-json': {
         const jsonStr = JSON.stringify(this.lhr, null, 2);
         const filename = getLhrFilenamePrefix(this._reportUIFeatures.json);
-        this._reportUIFeatures._saveFile(
+        this._dom.saveFile(
           new Blob([jsonStr], {type: 'application/json'}),
           filename
         );
@@ -116,7 +116,7 @@ export class TopbarFeatures {
         const htmlStr = this._reportUIFeatures.getReportHtml();
         const filename = getLhrFilenamePrefix(this._reportUIFeatures.json);
         try {
-          this._reportUIFeatures._saveFile(
+          this._dom.saveFile(
             new Blob([htmlStr], {type: 'text/html'}),
             filename
           );

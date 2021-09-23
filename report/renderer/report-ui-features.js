@@ -321,23 +321,4 @@ export class ReportUIFeatures {
 
     return thirdPartyRows;
   }
-
-  /**
-   * Downloads a file (blob) using a[download].
-   * @param {Blob|File} blob The file to save.
-   * @param {string} filename
-   */
-  _saveFile(blob, filename) {
-    const ext = blob.type.match('json') ? '.json' : '.html';
-
-    const a = this._dom.createElement('a');
-    a.download = `${filename}${ext}`;
-    this._dom.safelySetBlobHref(a, blob);
-    this._document.body.appendChild(a); // Firefox requires anchor to be in the DOM.
-    a.click();
-
-    // cleanup.
-    this._document.body.removeChild(a);
-    setTimeout(() => URL.revokeObjectURL(a.href), 500);
-  }
 }

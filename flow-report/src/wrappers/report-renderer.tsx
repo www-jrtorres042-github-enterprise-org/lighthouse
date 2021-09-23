@@ -11,14 +11,12 @@ import {CategoryRenderer} from '../../../report/renderer/category-renderer';
 import {DetailsRenderer} from '../../../report/renderer/details-renderer';
 import {DOM} from '../../../report/renderer/dom';
 import {ReportRenderer} from '../../../report/renderer/report-renderer';
-import {ReportUIFeatures} from '../../../report/renderer/report-ui-features';
 
 interface ReportRendererGlobals {
    dom: DOM,
    detailsRenderer: DetailsRenderer,
    categoryRenderer: CategoryRenderer,
    reportRenderer: ReportRenderer,
-   reportUIFeatures: ReportUIFeatures,
 }
 
 export const ReportRendererContext = createContext<ReportRendererGlobals|undefined>(undefined);
@@ -35,13 +33,11 @@ export const ReportRendererProvider: FunctionComponent = ({children}) => {
     const detailsRenderer = new DetailsRenderer(dom);
     const categoryRenderer = new CategoryRenderer(dom, detailsRenderer);
     const reportRenderer = new ReportRenderer(dom);
-    const reportUIFeatures = new ReportUIFeatures(dom);
     return {
       dom,
       detailsRenderer,
       categoryRenderer,
       reportRenderer,
-      reportUIFeatures,
     };
   }, []);
   return (

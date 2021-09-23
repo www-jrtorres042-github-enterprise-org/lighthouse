@@ -23,8 +23,8 @@ let mockSaveFile = jest.fn();
 beforeEach(() => {
   mockSaveFile = jest.fn();
   const reportRendererValue: any = {
-    reportUIFeatures: {
-      _saveFile: mockSaveFile,
+    dom: {
+      saveFile: mockSaveFile,
     },
   };
   wrapper = ({children}) => (
