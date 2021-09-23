@@ -7,6 +7,13 @@
 import {jest} from '@jest/globals';
 import {JSDOM} from 'jsdom';
 
+class MockClass {
+  args: any[];
+  constructor(...args: any[]) {
+    this.args = args;
+  }
+}
+
 /**
  * The jest environment "jsdom" does not work when preact is combined with the report renderer.
  */
@@ -17,6 +24,7 @@ export function setupJsDom() {
   global.window = window as any;
   global.document = window.document;
   global.location = window.location;
+  global.Blob = class extends MockClass {} as any;
 
   // Function not implemented in JSDOM.
   window.Element.prototype.scrollIntoView = jest.fn();

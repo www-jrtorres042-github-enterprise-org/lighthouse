@@ -21,7 +21,7 @@ interface ReportRendererGlobals {
    reportUIFeatures: ReportUIFeatures,
 }
 
-const ReportRendererContext = createContext<ReportRendererGlobals|undefined>(undefined);
+export const ReportRendererContext = createContext<ReportRendererGlobals|undefined>(undefined);
 
 export function useReportRenderer() {
   const globals = useContext(ReportRendererContext);
