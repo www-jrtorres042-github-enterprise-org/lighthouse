@@ -41,7 +41,6 @@ export class TopbarFeatures {
     this.onCopy = this.onCopy.bind(this);
     this.collapseAllDetails = this.collapseAllDetails.bind(this);
     this._updateStickyHeaderOnScroll = this._updateStickyHeaderOnScroll.bind(this);
-    this._mqlListener = this._mqlListener.bind(this);
   }
 
   /**
@@ -52,7 +51,7 @@ export class TopbarFeatures {
     this._document.addEventListener('keyup', this.onKeyUp);
     this._document.addEventListener('copy', this.onCopy);
     this._dropDownMenu.setup(this.onDropDownMenuClick);
-    this.installAfterPrintListener();
+    this._setUpCollapseDetailsAfterPrinting();
 
     const topbarLogo = this._dom.find('.lh-topbar__logo', this._document);
     topbarLogo.addEventListener('click', () => toggleDarkTheme(this._dom));
@@ -254,36 +253,23 @@ export class TopbarFeatures {
   }
 
   /**
-   * @param {MediaQueryListEvent} mql
-   */
-  _mqlListener(mql) {
-    if (mql.matches) {
-      this.expandAllDetails();
-    } else {
-      this.collapseAllDetails();
-    }
-  }
-
-  /**
    * Sets up listeners to collapse audit `<details>` when the user closes the
    * print dialog, all `<details>` are collapsed.
    */
-  installAfterPrintListener() {
+  _setUpCollapseDetailsAfterPrinting() {
     // FF and IE implement these old events.
     if ('onbeforeprint' in self) {
       self.addEventListener('afterprint', this.collapseAllDetails);
     } else {
       // Note: FF implements both window.onbeforeprint and media listeners. However,
       // it doesn't matchMedia doesn't fire when matching 'print'.
-      self.matchMedia('print').addListener(this._mqlListener);
-    }
-  }
-
-  uninstallAfterPrintListener() {
-    if ('onbeforeprint' in self) {
-      self.removeEventListener('afterprint', this.collapseAllDetails);
-    } else {
-      self.matchMedia('print').removeListener(this._mqlListener);
+      self.matchMedia('print').addListener(mql => {
+        if (mql.matches) {
+          this.expandAllDetails();
+        } else {
+          this.collapseAllDetails();
+        }
+      });
     }
   }
 
