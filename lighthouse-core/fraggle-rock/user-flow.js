@@ -12,8 +12,6 @@ const {navigation, startTimespan, snapshot} = require('./api.js');
 /** @typedef {Omit<FrOptions, 'page'> & {name?: string}} UserFlowOptions */
 /** @typedef {Omit<FrOptions, 'page'> & {stepName?: string}} StepOptions */
 
-const DEFAULT_FLOW_NAME = 'User flow';
-
 class UserFlow {
   /**
    * @param {FrOptions['page']} page
@@ -22,8 +20,8 @@ class UserFlow {
   constructor(page, options) {
     /** @type {FrOptions} */
     this.options = {page, ...options};
-    /** @type {string} */
-    this.name = (options && options.name) || DEFAULT_FLOW_NAME;
+    /** @type {string|undefined} */
+    this.name = options && options.name;
     /** @type {LH.FlowResult.Step[]} */
     this.steps = [];
   }
@@ -124,7 +122,10 @@ class UserFlow {
    * @return {LH.FlowResult}
    */
   getFlowResult() {
-    return {steps: this.steps, name: this.name};
+    if (!this.steps.length) throw Error('Need at least one step before getting the flow result');
+    const url = new URL(this.steps[0].lhr.finalUrl);
+    const name = this.name || `User flow (${url.hostname})`;
+    return {steps: this.steps, name};
   }
 
   /**
