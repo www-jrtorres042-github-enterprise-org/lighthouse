@@ -8,9 +8,12 @@ import {FunctionComponent, JSX} from 'preact';
 
 import {getFilenamePrefix} from '../../report/generator/file-namer';
 import {HamburgerIcon} from './icons';
-import {downloadFile, useFlowResult} from './util';
+import {useFlowResult} from './util';
+import {useReportRenderer} from './wrappers/report-renderer';
 
-function saveHtml(flowResult: LH.FlowResult) {
+import type {ReportUIFeatures} from '../../report/renderer/report-ui-features';
+
+function saveHtml(flowResult: LH.FlowResult, reportUIFeatures: ReportUIFeatures) {
   const htmlStr = document.documentElement.outerHTML;
   const blob = new Blob([htmlStr], {type: 'text/html'});
 
@@ -18,7 +21,7 @@ function saveHtml(flowResult: LH.FlowResult) {
   const name = flowResult.name.replace(/\s/g, '-');
   const filenamePrefix = getFilenamePrefix(name, lhr.fetchTime);
 
-  downloadFile(blob, filenamePrefix);
+  reportUIFeatures._saveFile(blob, filenamePrefix);
 }
 
 /* eslint-disable max-len */
@@ -69,6 +72,7 @@ const TopbarButton: FunctionComponent<{onClick: JSX.MouseEventHandler<HTMLButton
 export const Topbar: FunctionComponent<{onMenuClick: JSX.MouseEventHandler<HTMLButtonElement>}> =
 ({onMenuClick}) => {
   const flowResult = useFlowResult();
+  const {reportUIFeatures} = useReportRenderer();
 
   return (
     <div className="Topbar">
@@ -79,7 +83,7 @@ export const Topbar: FunctionComponent<{onMenuClick: JSX.MouseEventHandler<HTMLB
         <Logo/>
       </div>
       <div className="Topbar__title">Lighthouse User Flow Report</div>
-      <TopbarButton onClick={() => saveHtml(flowResult)}>Save</TopbarButton>
+      <TopbarButton onClick={() => saveHtml(flowResult, reportUIFeatures)}>Save</TopbarButton>
     </div>
   );
 };
