@@ -10,33 +10,12 @@
  * in the browser (as long as they have access to a debugger protocol Connection).
  */
 
-/**
- * Rollup plugins don't export types that work with commonjs.
- * @template T
- * @param {T} module
- * @return {T['default']}
- */
-function rollupPluginTypeCoerce(module) {
-  // @ts-expect-error
-  return module;
-}
-
 const fs = require('fs');
 const path = require('path');
 const rollup = require('rollup');
-const alias = rollupPluginTypeCoerce(require('@rollup/plugin-alias'));
-const commonjs = rollupPluginTypeCoerce(require('rollup-plugin-commonjs'));
-const json = rollupPluginTypeCoerce(require('@rollup/plugin-json'));
-const nodePolyfills = rollupPluginTypeCoerce(require('rollup-plugin-node-polyfills'));
-const nodeResolve = rollupPluginTypeCoerce(require('rollup-plugin-node-resolve'));
-const replace = rollupPluginTypeCoerce(require('rollup-plugin-replace'));
-const postprocess = require('@stadtlandnetz/rollup-plugin-postprocess');
-// @ts-expect-error: no types
-const shim = require('rollup-plugin-shim');
-const {terser} = require('rollup-plugin-terser');
+const rollupPlugins = require('./rollup-plugins.js');
 const {minifyFileTransform} = require('./build-utils.js');
 const Runner = require('../lighthouse-core/runner.js');
-const rollupBrfs = require('./rollup-brfs.js');
 const {LH_ROOT} = require('../root.js');
 
 const COMMIT_HASH = require('child_process')
@@ -149,7 +128,7 @@ async function build(entryPath, distPath, opts = {minify: true}) {
     input: entryPath,
     context: 'globalThis',
     plugins: [
-      replace({
+      rollupPlugins.replace({
         delimiters: ['', ''],
         values: {
           '/* BUILD_REPLACE_BUNDLED_MODULES */': `[\n${bundledMapEntriesCode},\n]`,
@@ -160,14 +139,14 @@ async function build(entryPath, distPath, opts = {minify: true}) {
           'require(\'intl-messageformat\').default': 'require(\'intl-messageformat\')',
         },
       }),
-      alias({
+      rollupPlugins.alias({
         entries: {
           'debug': require.resolve('debug/src/browser.js'),
           'lighthouse-logger': require.resolve('../lighthouse-logger/index.js'),
           'url': require.resolve('../lighthouse-core/lib/url-shim.js'),
         },
       }),
-      shim({
+      rollupPlugins.shim({
         ...shimsObj,
         // Allows for plugins to import lighthouse.
         'lighthouse': `
@@ -177,46 +156,46 @@ async function build(entryPath, distPath, opts = {minify: true}) {
       }),
       // Currently must run before commonjs (brfs does not support import).
       // This currenty messes up source maps.
-      rollupBrfs({
-        readFileSyncTransform: minifyFileTransform,
+      rollupPlugins.brfs({
+        readFileTransform: minifyFileTransform,
         global: true,
         parserOpts: {ecmaVersion: 12, sourceType: 'module'},
       }),
-      commonjs({
+      rollupPlugins.commonjs({
         // https://github.com/rollup/plugins/issues/922
         ignoreGlobal: true,
       }),
-      json(),
-      nodeResolve({preferBuiltins: true}),
+      rollupPlugins.json(),
+      rollupPlugins.nodeResolve({preferBuiltins: true}),
       // TODO: ideally would use https://github.com/snowpackjs/rollup-plugin-polyfill-node
       // More maintained. also has EventEmitter.off. But it gets rollup errors from commonjs.
-      nodePolyfills(),
+      rollupPlugins.nodePolyfills(),
       // Rollup sees the usages of these functions in page functions (ex: see AnchorElements)
       // and treats them as globals. Because the names are "taken" by the global, Rollup renames
       // the actual functions (getNodeDetails$1). The page functions expect a certain name, so
       // here we undo what Rollup did.
-      postprocess([
+      rollupPlugins.postprocess([
         [/getBoundingClientRect\$1/, 'getBoundingClientRect'],
         [/getElementsInDocument\$1/, 'getElementsInDocument'],
         [/getNodeDetails\$1/, 'getNodeDetails'],
         [/getRectCenterPoint\$1/, 'getRectCenterPoint'],
         [/isPositionFixed\$1/, 'isPositionFixed'],
       ]),
-      opts.minify && terser({
-        ecma: 2019,
-        output: {
-          comments: (node, comment) => {
-            const text = comment.value;
-            if (text.includes('The Lighthouse Authors') && comment.line > 1) return false;
-            return /@ts-nocheck - Prevent tsc|@preserve|@license|@cc_on/i.test(text);
-          },
-          max_line_len: 1000,
-        },
-        // The config relies on class names for gatherers.
-        keep_classnames: true,
-        // Runtime.evaluate errors if function names are elided.
-        keep_fnames: true,
-      }),
+      // opts.minify && rollupPlugins.terser({
+      //   ecma: 2019,
+      //   output: {
+      //     comments: (node, comment) => {
+      //       const text = comment.value;
+      //       if (text.includes('The Lighthouse Authors') && comment.line > 1) return false;
+      //       return /@ts-nocheck - Prevent tsc|@preserve|@license|@cc_on/i.test(text);
+      //     },
+      //     max_line_len: 1000,
+      //   },
+      //   // The config relies on class names for gatherers.
+      //   keep_classnames: true,
+      //   // Runtime.evaluate errors if function names are elided.
+      //   keep_fnames: true,
+      // }),
     ],
   });
 
