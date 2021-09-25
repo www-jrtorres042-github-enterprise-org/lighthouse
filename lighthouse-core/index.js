@@ -5,19 +5,12 @@
  */
 'use strict';
 
-const EventEmitter = require('events');
 const Runner = require('./runner.js');
 const log = require('lighthouse-logger');
 const ChromeProtocol = require('./gather/connections/cri.js');
 const Config = require('./config/config.js');
 
 /** @typedef {import('./gather/connections/connection.js')} Connection */
-
-// rollup-plugin-node-polyfills does not polyfill EventEmitter.off,
-// so do it manually.
-if (!EventEmitter.prototype.off) {
-  EventEmitter.prototype.off = EventEmitter.prototype.removeListener;
-}
 
 /*
  * The relationship between these root modules:

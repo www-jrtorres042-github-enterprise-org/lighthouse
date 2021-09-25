@@ -154,6 +154,7 @@ async function build(entryPath, distPath, opts = {minify: true}) {
           export {Audit};
         `,
       }),
+      rollupPlugins.json(),
       // Currently must run before commonjs (brfs does not support import).
       // This currenty messes up source maps.
       rollupPlugins.brfs({
@@ -161,15 +162,12 @@ async function build(entryPath, distPath, opts = {minify: true}) {
         global: true,
         parserOpts: {ecmaVersion: 12, sourceType: 'module'},
       }),
+      rollupPlugins.nodePolyfills(),
+      rollupPlugins.nodeResolve({preferBuiltins: true}),
       rollupPlugins.commonjs({
         // https://github.com/rollup/plugins/issues/922
         ignoreGlobal: true,
       }),
-      rollupPlugins.json(),
-      rollupPlugins.nodeResolve({preferBuiltins: true}),
-      // TODO: ideally would use https://github.com/snowpackjs/rollup-plugin-polyfill-node
-      // More maintained. also has EventEmitter.off. But it gets rollup errors from commonjs.
-      rollupPlugins.nodePolyfills(),
       // Rollup sees the usages of these functions in page functions (ex: see AnchorElements)
       // and treats them as globals. Because the names are "taken" by the global, Rollup renames
       // the actual functions (getNodeDetails$1). The page functions expect a certain name, so
@@ -181,21 +179,21 @@ async function build(entryPath, distPath, opts = {minify: true}) {
         [/getRectCenterPoint\$1/, 'getRectCenterPoint'],
         [/isPositionFixed\$1/, 'isPositionFixed'],
       ]),
-      // opts.minify && rollupPlugins.terser({
-      //   ecma: 2019,
-      //   output: {
-      //     comments: (node, comment) => {
-      //       const text = comment.value;
-      //       if (text.includes('The Lighthouse Authors') && comment.line > 1) return false;
-      //       return /@ts-nocheck - Prevent tsc|@preserve|@license|@cc_on/i.test(text);
-      //     },
-      //     max_line_len: 1000,
-      //   },
-      //   // The config relies on class names for gatherers.
-      //   keep_classnames: true,
-      //   // Runtime.evaluate errors if function names are elided.
-      //   keep_fnames: true,
-      // }),
+      opts.minify && rollupPlugins.terser({
+        ecma: 2019,
+        output: {
+          comments: (node, comment) => {
+            const text = comment.value;
+            if (text.includes('The Lighthouse Authors') && comment.line > 1) return false;
+            return /@ts-nocheck - Prevent tsc|@preserve|@license|@cc_on/i.test(text);
+          },
+          max_line_len: 1000,
+        },
+        // The config relies on class names for gatherers.
+        keep_classnames: true,
+        // Runtime.evaluate errors if function names are elided.
+        keep_fnames: true,
+      }),
     ],
   });
 
