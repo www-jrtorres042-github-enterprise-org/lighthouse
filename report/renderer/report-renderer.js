@@ -91,30 +91,26 @@ export class ReportRenderer {
 
     const envValues = Util.getEmulationDescriptions(report.configSettings || {});
     const runtimeValues = [
-      {name: Util.i18n.strings.runtimeSettingsUrl, description: report.finalUrl},
-      {name: Util.i18n.strings.runtimeSettingsFetchTime,
-        description: Util.i18n.formatDateTime(report.fetchTime)},
+      [Util.i18n.strings.runtimeSettingsUrl, report.finalUrl],
+      [Util.i18n.strings.runtimeSettingsFetchTime, Util.i18n.formatDateTime(report.fetchTime)],
       ...envValues,
-      {name: Util.i18n.strings.runtimeSettingsChannel, description: report.configSettings.channel},
-      {name: Util.i18n.strings.runtimeSettingsUA, description: report.userAgent},
-      {name: Util.i18n.strings.runtimeSettingsUANetwork, description: report.environment &&
-        report.environment.networkUserAgent},
-      {name: Util.i18n.strings.runtimeSettingsBenchmark, description: report.environment &&
-        report.environment.benchmarkIndex.toFixed(0)},
+      [Util.i18n.strings.runtimeSettingsChannel, report.configSettings.channel],
+      [Util.i18n.strings.runtimeSettingsUA, report.userAgent],
+      [Util.i18n.strings.runtimeSettingsUANetwork, report?.environment.networkUserAgent],
+      [Util.i18n.strings.runtimeSettingsBenchmark, report?.environment.benchmarkIndex.toFixed(0)],
     ];
     if (report.environment.credits && report.environment.credits['axe-core']) {
-      runtimeValues.push({
-        name: Util.i18n.strings.runtimeSettingsAxeVersion,
-        description: report.environment.credits['axe-core'],
-      });
+      runtimeValues.push([
+        Util.i18n.strings.runtimeSettingsAxeVersion, report.environment.credits['axe-core'],
+      ]);
     }
 
-    for (const runtime of runtimeValues) {
-      if (!runtime.description) continue;
+    for (const [name, description] of runtimeValues) {
+      if (!description) continue;
 
       const item = this._dom.createComponent('envItem');
-      this._dom.find('.lh-env__name', item).textContent = runtime.name;
-      this._dom.find('.lh-env__description', item).textContent = runtime.description;
+      this._dom.find('.lh-env__name', item).textContent = name;
+      this._dom.find('.lh-env__description', item).textContent = description;
       env.appendChild(item);
     }
 

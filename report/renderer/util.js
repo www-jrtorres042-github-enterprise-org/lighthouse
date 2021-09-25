@@ -390,7 +390,7 @@ export class Util {
 
   /**
    * @param {LH.Result['configSettings']} settings
-   * @return {!Array<{name: string, description: string}>}
+   * @return {!Array<[string, string]>}
    */
   static getEmulationDescriptions(settings) {
     let cpuThrottling;
@@ -431,22 +431,10 @@ export class Util {
     }[settings.formFactor] || Util.i18n.strings.runtimeNoEmulation;
 
     return [
-      {
-        name: Util.i18n.strings.runtimeSettingsDevice,
-        description: deviceEmulation,
-      },
-      {
-        name: Util.i18n.strings.runtimeSettingsNetworkThrottling,
-        description: networkThrottling,
-      },
-      {
-        name: Util.i18n.strings.runtimeSettingsCPUThrottling,
-        description: cpuThrottling,
-      },
-      {
-        name: 'Summary',
-        description: summary,
-      },
+      [Util.i18n.strings.runtimeSettingsDevice, deviceEmulation],
+      [Util.i18n.strings.runtimeSettingsNetworkThrottling, networkThrottling],
+      [Util.i18n.strings.runtimeSettingsCPUThrottling, cpuThrottling],
+      ['Summary', summary],
     ];
   }
 
