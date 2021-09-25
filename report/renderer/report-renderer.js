@@ -85,9 +85,21 @@ export class ReportRenderer {
   _renderReportFooter(report) {
     const footer = this._dom.createComponent('footer');
 
+    this._dom.find('.lh-env__title', footer).textContent = Util.i18n.strings.runtimeSettingsTitle;
+    this._renderRuntimeSettings(report, footer);
+
+    this._dom.find('.lh-footer__version_issue', footer).textContent = Util.i18n.strings.footerIssue;
+    this._dom.find('.lh-footer__version', footer).textContent = report.lighthouseVersion;
+    return footer;
+  }
+
+  /**
+   * @param {LH.ReportResult} report
+   * @param {DocumentFragment} footer
+   */
+  _renderRuntimeSettings(report, footer) {
     const env = this._dom.find('.lh-env__items', footer);
     env.id = 'runtime-settings';
-    this._dom.find('.lh-env__title', footer).textContent = Util.i18n.strings.runtimeSettingsTitle;
 
     const envValues = Util.getEmulationDescriptions(report.configSettings || {});
     const runtimeValues = [
@@ -113,10 +125,6 @@ export class ReportRenderer {
       this._dom.find('.lh-env__description', item).textContent = description;
       env.appendChild(item);
     }
-
-    this._dom.find('.lh-footer__version_issue', footer).textContent = Util.i18n.strings.footerIssue;
-    this._dom.find('.lh-footer__version', footer).textContent = report.lighthouseVersion;
-    return footer;
   }
 
   /**
