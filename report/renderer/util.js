@@ -387,43 +387,21 @@ export class Util {
     return hostname.split('.').slice(-splitTld.length).join('.');
   }
 
+
   /**
    * @param {LH.Result['configSettings']} settings
    * @return {!Array<{name: string, description: string}>}
    */
-  static getEnvironmentDisplayValues(settings) {
-    const emulationDesc = Util.getEmulationDescriptions(settings);
-
-    return [
-      {
-        name: Util.i18n.strings.runtimeSettingsDevice,
-        description: emulationDesc.deviceEmulation,
-      },
-      {
-        name: Util.i18n.strings.runtimeSettingsNetworkThrottling,
-        description: emulationDesc.networkThrottling,
-      },
-      {
-        name: Util.i18n.strings.runtimeSettingsCPUThrottling,
-        description: emulationDesc.cpuThrottling,
-      },
-    ];
-  }
-
-  /**
-   * @param {LH.Result['configSettings']} settings
-   * @return {{deviceEmulation: string, networkThrottling: string, cpuThrottling: string}}
-   */
   static getEmulationDescriptions(settings) {
     let cpuThrottling;
     let networkThrottling;
+    let summary;
 
     const throttling = settings.throttling;
 
     switch (settings.throttlingMethod) {
       case 'provided':
-        cpuThrottling = Util.i18n.strings.throttlingProvided;
-        networkThrottling = Util.i18n.strings.throttlingProvided;
+        summary = networkThrottling = cpuThrottling = Util.i18n.strings.throttlingProvided;
         break;
       case 'devtools': {
         const {cpuSlowdownMultiplier, requestLatencyMs} = throttling;
@@ -431,6 +409,7 @@ export class Util {
         networkThrottling = `${Util.i18n.formatNumber(requestLatencyMs)}${NBSP}ms HTTP RTT, ` +
           `${Util.i18n.formatNumber(throttling.downloadThroughputKbps)}${NBSP}Kbps down, ` +
           `${Util.i18n.formatNumber(throttling.uploadThroughputKbps)}${NBSP}Kbps up (DevTools)`;
+        summary = `Slow 4G throttling by DevTools`;
         break;
       }
       case 'simulate': {
@@ -438,11 +417,11 @@ export class Util {
         cpuThrottling = `${Util.i18n.formatNumber(cpuSlowdownMultiplier)}x slowdown (Simulated)`;
         networkThrottling = `${Util.i18n.formatNumber(rttMs)}${NBSP}ms TCP RTT, ` +
           `${Util.i18n.formatNumber(throughputKbps)}${NBSP}Kbps throughput (Simulated)`;
+        summary = `Simulated slow 4G`;
         break;
       }
       default:
-        cpuThrottling = Util.i18n.strings.runtimeUnknown;
-        networkThrottling = Util.i18n.strings.runtimeUnknown;
+        summary = cpuThrottling = networkThrottling = Util.i18n.strings.runtimeUnknown;
     }
 
     // TODO(paulirish): revise Runtime Settings strings: https://github.com/GoogleChrome/lighthouse/pull/11796
@@ -451,11 +430,24 @@ export class Util {
       desktop: Util.i18n.strings.runtimeDesktopEmulation,
     }[settings.formFactor] || Util.i18n.strings.runtimeNoEmulation;
 
-    return {
-      deviceEmulation,
-      cpuThrottling,
-      networkThrottling,
-    };
+    return [
+      {
+        name: Util.i18n.strings.runtimeSettingsDevice,
+        description: deviceEmulation,
+      },
+      {
+        name: Util.i18n.strings.runtimeSettingsNetworkThrottling,
+        description: networkThrottling,
+      },
+      {
+        name: Util.i18n.strings.runtimeSettingsCPUThrottling,
+        description: cpuThrottling,
+      },
+      {
+        name: 'Summary',
+        description: summary,
+      },
+    ];
   }
 
   /**

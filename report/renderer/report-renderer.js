@@ -89,7 +89,7 @@ export class ReportRenderer {
     env.id = 'runtime-settings';
     this._dom.find('.lh-env__title', footer).textContent = Util.i18n.strings.runtimeSettingsTitle;
 
-    const envValues = Util.getEnvironmentDisplayValues(report.configSettings || {});
+    const envValues = Util.getEmulationDescriptions(report.configSettings || {});
     const runtimeValues = [
       {name: Util.i18n.strings.runtimeSettingsUrl, description: report.finalUrl},
       {name: Util.i18n.strings.runtimeSettingsFetchTime,
