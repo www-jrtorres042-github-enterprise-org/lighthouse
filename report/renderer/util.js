@@ -409,7 +409,7 @@ export class Util {
         networkThrottling = `${Util.i18n.formatNumber(requestLatencyMs)}${NBSP}ms HTTP RTT, ` +
           `${Util.i18n.formatNumber(throttling.downloadThroughputKbps)}${NBSP}Kbps down, ` +
           `${Util.i18n.formatNumber(throttling.uploadThroughputKbps)}${NBSP}Kbps up (DevTools)`;
-        summary = `Slow 4G throttling by DevTools`;
+        summary = `Slow 4G throttling by DevTools`; // TODO: only call 4g if numbers match.
         break;
       }
       case 'simulate': {
@@ -417,7 +417,7 @@ export class Util {
         cpuThrottling = `${Util.i18n.formatNumber(cpuSlowdownMultiplier)}x slowdown (Simulated)`;
         networkThrottling = `${Util.i18n.formatNumber(rttMs)}${NBSP}ms TCP RTT, ` +
           `${Util.i18n.formatNumber(throughputKbps)}${NBSP}Kbps throughput (Simulated)`;
-        summary = `Simulated slow 4G`;
+        summary = `Simulated slow 4G`; // TODO: only call 4g if numbers match.
         break;
       }
       default:

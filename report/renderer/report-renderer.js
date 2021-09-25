@@ -86,11 +86,53 @@ export class ReportRenderer {
     const footer = this._dom.createComponent('footer');
 
     this._dom.find('.lh-env__title', footer).textContent = Util.i18n.strings.runtimeSettingsTitle;
+    this._renderMetaBlock(report, footer);
     this._renderRuntimeSettings(report, footer);
 
     this._dom.find('.lh-footer__version_issue', footer).textContent = Util.i18n.strings.footerIssue;
     this._dom.find('.lh-footer__version', footer).textContent = report.lighthouseVersion;
     return footer;
+  }
+
+
+  /**
+   * @param {LH.ReportResult} report
+   * @param {DocumentFragment} footer
+   */
+  _renderMetaBlock(report, footer) {
+    const metaItemsEl = this._dom.find('.lh-meta__items', footer);
+    const envValues = Util.getEmulationDescriptions(report.configSettings || {});
+
+    let chromeVer = report.userAgent.match(/(\w+?Chrome\/[0-9.]+)/); // \w+ to include 'HeadlessChrome'
+    chromeVer = chromeVer && chromeVer[1].replace('/', ' ');
+
+    const pageloadDurationMs = Math.max(
+      report.timing.entries.find(e => e.name === 'lh:gather:loadPage-defaultPass')?.duration || 0,
+      report.audits.interactive.numericValue || 0,
+    );
+
+    // [iconname for CSS class, textContent, tooltip text?]
+    const metaItems = [
+      ['date', `Real time (${Util.i18n.formatDateTime(report.fetchTime)})`],
+      [
+        'devices',
+        `Lighthouse ${report.lighthouseVersion} on ${chromeVer}, emulating a ${envValues[0][1]}`,
+        `Host CPU Power: ${report?.environment.benchmarkIndex.toFixed(0)}. ` +
+            `Emulated userAgent: "${report?.environment.networkUserAgent}"`,
+      ],
+      ['samples', `Singular load from ${report.configSettings.channel}`],
+      ['stopwatch', `${Util.i18n.formatSeconds(pageloadDurationMs)} of load`],
+      ['networkspeed', `${envValues[3][1]}`, envValues[1][1]],
+    ];
+
+    for (const [iconname, text, tooltip] of metaItems) {
+      const itemEl = this._dom.createChildOf(metaItemsEl, 'li', 'lh-meta__item');
+      itemEl.textContent = text;
+      if (tooltip) {
+        itemEl.title = tooltip;
+      }
+      itemEl.classList.add('lh-report-icon', `lh-report-icon--${iconname}`);
+    }
   }
 
   /**
