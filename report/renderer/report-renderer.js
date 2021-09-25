@@ -121,7 +121,7 @@ export class ReportRenderer {
             `CPU throttling: ${envValues[2][1]}. ` +
             `${Util.i18n.strings.runtimeSettingsAxeVersion}: ${report.environment.credits['axe-core']}`,
       ],
-      ['samples', `Singular load from ${report.configSettings.channel}`],
+      ['samples-one', `Singular load from ${report.configSettings.channel}`],
 
       ['stopwatch', `${Util.i18n.formatSeconds(pageloadDurationMs)} of load`],
       ['networkspeed', `${envValues[3][1]}`, envValues[1][1]],
