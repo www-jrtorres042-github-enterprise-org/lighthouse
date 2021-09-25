@@ -113,16 +113,19 @@ export class ReportRenderer {
 
     // [iconname for CSS class, textContent, tooltip text?]
     const metaItems = [
-      ['date', `Real time (${Util.i18n.formatDateTime(report.fetchTime)})`],
+      ['date', `Captured at ${Util.i18n.formatDateTime(report.fetchTime)}`],
       [
         'devices',
-        `Lighthouse ${report.lighthouseVersion} on ${chromeVer}, emulating a ${envValues[0][1]}`,
-        `Host CPU Power: ${report?.environment.benchmarkIndex.toFixed(0)}. ` +
-            `Emulated userAgent: "${report?.environment.networkUserAgent}"`,
+        `Lighthouse ${report.lighthouseVersion} emulating a ${envValues[0][1]}`,
+            `Host CPU Power: ${report?.environment.benchmarkIndex.toFixed(0)}. ` +
+            `CPU throttling: ${envValues[2][1]}. ` +
+            `${Util.i18n.strings.runtimeSettingsAxeVersion}: ${report.environment.credits['axe-core']}`,
       ],
       ['samples', `Singular load from ${report.configSettings.channel}`],
+
       ['stopwatch', `${Util.i18n.formatSeconds(pageloadDurationMs)} of load`],
       ['networkspeed', `${envValues[3][1]}`, envValues[1][1]],
+      ['chrome', `Using ${chromeVer}`, envValues[1][1],  `Emulated userAgent: "${report?.environment.networkUserAgent}"`],
     ];
 
     for (const [iconname, text, tooltip] of metaItems) {
