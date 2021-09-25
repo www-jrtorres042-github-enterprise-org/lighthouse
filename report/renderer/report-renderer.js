@@ -85,15 +85,12 @@ export class ReportRenderer {
   _renderReportFooter(report) {
     const footer = this._dom.createComponent('footer');
 
-    this._dom.find('.lh-env__title', footer).textContent = Util.i18n.strings.runtimeSettingsTitle;
     this._renderMetaBlock(report, footer);
-    this._renderRuntimeSettings(report, footer);
 
     this._dom.find('.lh-footer__version_issue', footer).textContent = Util.i18n.strings.footerIssue;
     this._dom.find('.lh-footer__version', footer).textContent = report.lighthouseVersion;
     return footer;
   }
-
 
   /**
    * @param {LH.ReportResult} report
@@ -135,40 +132,6 @@ export class ReportRenderer {
         itemEl.title = tooltip;
       }
       itemEl.classList.add('lh-report-icon', `lh-report-icon--${iconname}`);
-    }
-  }
-
-  /**
-   * @param {LH.ReportResult} report
-   * @param {DocumentFragment} footer
-   */
-  _renderRuntimeSettings(report, footer) {
-    const env = this._dom.find('.lh-env__items', footer);
-    env.id = 'runtime-settings';
-
-    const envValues = Util.getEmulationDescriptions(report.configSettings || {});
-    const runtimeValues = [
-      [Util.i18n.strings.runtimeSettingsUrl, report.finalUrl],
-      [Util.i18n.strings.runtimeSettingsFetchTime, Util.i18n.formatDateTime(report.fetchTime)],
-      ...envValues,
-      [Util.i18n.strings.runtimeSettingsChannel, report.configSettings.channel],
-      [Util.i18n.strings.runtimeSettingsUA, report.userAgent],
-      [Util.i18n.strings.runtimeSettingsUANetwork, report?.environment.networkUserAgent],
-      [Util.i18n.strings.runtimeSettingsBenchmark, report?.environment.benchmarkIndex.toFixed(0)],
-    ];
-    if (report.environment.credits && report.environment.credits['axe-core']) {
-      runtimeValues.push([
-        Util.i18n.strings.runtimeSettingsAxeVersion, report.environment.credits['axe-core'],
-      ]);
-    }
-
-    for (const [name, description] of runtimeValues) {
-      if (!description) continue;
-
-      const item = this._dom.createComponent('envItem');
-      this._dom.find('.lh-env__name', item).textContent = name;
-      this._dom.find('.lh-env__description', item).textContent = description;
-      env.appendChild(item);
     }
   }
 
