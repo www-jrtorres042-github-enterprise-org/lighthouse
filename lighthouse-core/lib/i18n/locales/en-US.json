@@ -2319,10 +2319,10 @@
     "message": "Passed audits"
   },
   "report/renderer/util.js | runtimeDesktopEmulation": {
-    "message": "Emulated Desktop"
+    "message": "emulating desktop"
   },
   "report/renderer/util.js | runtimeMobileEmulation": {
-    "message": "Emulated Moto G4"
+    "message": "emulating a Moto G4"
   },
   "report/renderer/util.js | runtimeNoEmulation": {
     "message": "No emulation"

@@ -1816,6 +1816,10 @@
   padding: calc(var(--default-padding) / 2) 0 0 calc(var(--default-padding) * 3);
 }
 
+.lh-meta__item[title] {
+  text-decoration: dotted underline var(--color-gray-300);
+}
+
 .lh-meta__item.lh-report-icon::before {
   position: absolute;
   left: var(--default-padding);
@@ -1825,6 +1829,18 @@
 
 .lh-meta__item.lh-report-icon:hover::before {
   opacity: unset;
+}
+
+/* Change the grid for narrow viewport. */
+@media screen and (max-width: 640px) {
+  .lh-meta__items {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+@media screen and (max-width: 535px) {
+  .lh-meta__items {
+    display: block;
+  }
 }
 
 

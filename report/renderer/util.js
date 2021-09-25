@@ -390,7 +390,7 @@ export class Util {
 
   /**
    * @param {LH.Result['configSettings']} settings
-   * @return {!Array<[string, string]>}
+   * @return {!{deviceEmulation: string, networkThrottling: string, cpuThrottling: string, summary: string}}
    */
   static getEmulationDescriptions(settings) {
     let cpuThrottling;
@@ -409,7 +409,9 @@ export class Util {
         networkThrottling = `${Util.i18n.formatNumber(requestLatencyMs)}${NBSP}ms HTTP RTT, ` +
           `${Util.i18n.formatNumber(throttling.downloadThroughputKbps)}${NBSP}Kbps down, ` +
           `${Util.i18n.formatNumber(throttling.uploadThroughputKbps)}${NBSP}Kbps up (DevTools)`;
-        summary = `Slow 4G throttling by DevTools`; // TODO: only call 4g if numbers match.
+
+        const isSlow4G = requestLatencyMs === 150 * 3.75;
+        summary = `${isSlow4G ? 'Slow 4G' : 'Custom'} throttling by DevTools`;
         break;
       }
       case 'simulate': {
@@ -417,7 +419,8 @@ export class Util {
         cpuThrottling = `${Util.i18n.formatNumber(cpuSlowdownMultiplier)}x slowdown (Simulated)`;
         networkThrottling = `${Util.i18n.formatNumber(rttMs)}${NBSP}ms TCP RTT, ` +
           `${Util.i18n.formatNumber(throughputKbps)}${NBSP}Kbps throughput (Simulated)`;
-        summary = `Simulated slow 4G`; // TODO: only call 4g if numbers match.
+        const isSlow4G = rttMs === 150;
+        summary = isSlow4G ? 'Simulated slow 4G' : 'Custom simulated throttling';
         break;
       }
       default:
@@ -430,12 +433,12 @@ export class Util {
       desktop: Util.i18n.strings.runtimeDesktopEmulation,
     }[settings.formFactor] || Util.i18n.strings.runtimeNoEmulation;
 
-    return [
-      [Util.i18n.strings.runtimeSettingsDevice, deviceEmulation],
-      [Util.i18n.strings.runtimeSettingsNetworkThrottling, networkThrottling],
-      [Util.i18n.strings.runtimeSettingsCPUThrottling, cpuThrottling],
-      ['Summary', summary],
-    ];
+    return {
+      deviceEmulation,
+      cpuThrottling,
+      networkThrottling,
+      summary,
+    };
   }
 
   /**
@@ -630,9 +633,9 @@ Util.UIStrings = {
   /** Descriptive explanation for emulation setting when no device emulation is set. */
   runtimeNoEmulation: 'No emulation',
   /** Descriptive explanation for emulation setting when emulating a Moto G4 mobile device. */
-  runtimeMobileEmulation: 'Emulated Moto G4',
+  runtimeMobileEmulation: 'emulating a Moto G4',
   /** Descriptive explanation for emulation setting when emulating a generic desktop form factor, as opposed to a mobile-device like form factor. */
-  runtimeDesktopEmulation: 'Emulated Desktop',
+  runtimeDesktopEmulation: 'emulating desktop',
   /** Descriptive explanation for a runtime setting that is set to an unknown value. */
   runtimeUnknown: 'Unknown',
 

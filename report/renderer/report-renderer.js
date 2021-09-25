@@ -97,34 +97,35 @@ export class ReportRenderer {
    * @param {DocumentFragment} footer
    */
   _renderMetaBlock(report, footer) {
-    const metaItemsEl = this._dom.find('.lh-meta__items', footer);
     const envValues = Util.getEmulationDescriptions(report.configSettings || {});
 
-    let chromeVer = report.userAgent.match(/(\w+?Chrome\/[0-9.]+)/); // \w+ to include 'HeadlessChrome'
-    chromeVer = chromeVer && chromeVer[1].replace('/', ' ');
-
+    const axeVersion = report.environment.credits['axe-core'];
+    const match = report.userAgent.match(/(\w*Chrome\/[\d.]+)/); // \w* to include 'HeadlessChrome'
+    const chromeVer = Array.isArray(match) ? match[1].replace('/', ' ') : 'Chrome';
     const pageloadDurationMs = Math.max(
       report.timing.entries.find(e => e.name === 'lh:gather:loadPage-defaultPass')?.duration || 0,
-      report.audits.interactive.numericValue || 0,
+      report.audits.interactive.numericValue || 0
     );
 
-    // [iconname for CSS class, textContent, tooltip text?]
+    // [CSS icon class, textContent, tooltipText]
     const metaItems = [
       ['date', `Captured at ${Util.i18n.formatDateTime(report.fetchTime)}`],
       [
         'devices',
-        `Lighthouse ${report.lighthouseVersion} emulating a ${envValues[0][1]}`,
-            `Host CPU Power: ${report?.environment.benchmarkIndex.toFixed(0)}. ` +
-            `CPU throttling: ${envValues[2][1]}. ` +
-            `${Util.i18n.strings.runtimeSettingsAxeVersion}: ${report.environment.credits['axe-core']}`,
+        `Lighthouse ${report.lighthouseVersion}, ${envValues.deviceEmulation}`,
+        `Host CPU Power: ${report?.environment.benchmarkIndex.toFixed(0)}. ` +
+            `CPU throttling: ${envValues.cpuThrottling}. ` +
+            `${Util.i18n.strings.runtimeSettingsAxeVersion}: ${axeVersion}`,
       ],
       ['samples-one', `Singular load from ${report.configSettings.channel}`],
 
       ['stopwatch', `${Util.i18n.formatSeconds(pageloadDurationMs)} of load`],
-      ['networkspeed', `${envValues[3][1]}`, envValues[1][1]],
-      ['chrome', `Using ${chromeVer}`, envValues[1][1],  `Emulated userAgent: "${report?.environment.networkUserAgent}"`],
+      ['networkspeed', `${envValues.summary}`, envValues.networkThrottling],
+      ['chrome', `Using ${chromeVer}`,
+        `Emulated userAgent: "${report?.environment.networkUserAgent}"`],
     ];
 
+    const metaItemsEl = this._dom.find('.lh-meta__items', footer);
     for (const [iconname, text, tooltip] of metaItems) {
       const itemEl = this._dom.createChildOf(metaItemsEl, 'li', 'lh-meta__item');
       itemEl.textContent = text;
