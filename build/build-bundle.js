@@ -162,12 +162,12 @@ async function build(entryPath, distPath, opts = {minify: true}) {
         global: true,
         parserOpts: {ecmaVersion: 12, sourceType: 'module'},
       }),
-      rollupPlugins.nodePolyfills(),
-      rollupPlugins.nodeResolve({preferBuiltins: true}),
       rollupPlugins.commonjs({
         // https://github.com/rollup/plugins/issues/922
         ignoreGlobal: true,
       }),
+      rollupPlugins.nodePolyfills(),
+      rollupPlugins.nodeResolve({preferBuiltins: true}),
       // Rollup sees the usages of these functions in page functions (ex: see AnchorElements)
       // and treats them as globals. Because the names are "taken" by the global, Rollup renames
       // the actual functions (getNodeDetails$1). The page functions expect a certain name, so

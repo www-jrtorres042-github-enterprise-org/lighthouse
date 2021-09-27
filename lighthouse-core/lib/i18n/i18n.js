@@ -8,9 +8,12 @@
 /** @typedef {import('../../lib/i18n/locales').LhlMessages} LhlMessages */
 
 const path = require('path');
-const MessageFormat = require('intl-messageformat').default;
+const MessageFormat = require('intl-messageformat');
 const lookupClosestLocale = require('lookup-closest-locale');
-const LOCALES = require('./locales.js');
+// .default required for rollup bundle to work.
+/** @type {import('./locales')} */
+// @ts-expect-error TODO(esmodules): remove when file is es modules.
+const LOCALES = require('./locales.js').default || require('./locales.js');
 const {isObjectOfUnknownValues, isObjectOrArrayOfUnknownValues} = require('../type-verifiers.js');
 const log = require('lighthouse-logger');
 const {LH_ROOT} = require('../../../root.js');
@@ -215,7 +218,7 @@ function collectAllCustomElementsFromICU(icuElements, seenElementsById = new Map
  * Returns a copy of the `values` object, with the values formatted based on how
  * they will be used in their icuMessage, e.g. KB or milliseconds. The original
  * object is unchanged.
- * @param {MessageFormat} messageFormatter
+ * @param {MessageFormat.IntlMessageFormat} messageFormatter
  * @param {Readonly<Record<string, string | number>>} values
  * @param {string} lhlMessage Used for clear error logging.
  * @return {Record<string, string | number>}
@@ -291,7 +294,10 @@ function _formatMessage(message, values = {}, locale) {
   // When using accented english, force the use of a different locale for number formatting.
   const localeForMessageFormat = (locale === 'en-XA' || locale === 'en-XL') ? 'de-DE' : locale;
 
-  const formatter = new MessageFormat(message, localeForMessageFormat, formats);
+  // This package is not correctly bundled by Rollup.
+  /** @type {typeof MessageFormat.IntlMessageFormat} */
+  const MessageFormatCtor = MessageFormat.IntlMessageFormat || MessageFormat;
+  const formatter = new MessageFormatCtor(message, localeForMessageFormat, formats);
 
   // Preformat values for the message format like KB and milliseconds.
   const valuesForMessageFormat = _preformatValues(formatter, values, message);
