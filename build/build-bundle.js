@@ -202,12 +202,6 @@ async function build(entryPath, distPath, opts = {minify: true}) {
     format: 'iife',
     sourcemap: DEBUG,
   });
-
-  if (isDevtools(entryPath) && !DEBUG) {
-    const code = fs.readFileSync(distPath);
-    const newCode = '// @ts-nocheck - Prevent tsc stepping into any required bundles.\n' + code;
-    fs.writeFileSync(distPath, newCode);
-  }
 }
 
 /**
