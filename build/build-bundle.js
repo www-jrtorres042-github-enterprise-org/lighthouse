@@ -136,6 +136,8 @@ async function build(entryPath, distPath, opts = {minify: true}) {
           // This package exports to default in a way that causes Rollup to get confused,
           // resulting in MessageFormat being undefined.
           'require(\'intl-messageformat\').default': 'require(\'intl-messageformat\')',
+          // Rollup doesn't replace this, so let's manually change it to false.
+          'require.main === module': 'false',
         },
       }),
       rollupPlugins.alias({
