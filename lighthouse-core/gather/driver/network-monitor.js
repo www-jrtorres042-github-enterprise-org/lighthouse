@@ -59,7 +59,6 @@ class NetworkMonitor {
     this.on = emitter.on.bind(emitter);
     /** @type {typeof emitter['once']} */
     this.once = emitter.once.bind(emitter);
-    // TODO: rollup bundle doesn't have emitter.off .....
     /** @type {typeof emitter['off']} */
     this.off = emitter.off.bind(emitter);
     /** @type {typeof emitter['addListener']} */
