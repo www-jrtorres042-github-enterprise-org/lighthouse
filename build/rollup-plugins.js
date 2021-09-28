@@ -18,6 +18,7 @@ function rollupPluginTypeCoerce(module) {
 
 const commonjs = rollupPluginTypeCoerce(require('@rollup/plugin-commonjs'));
 const {nodeResolve} = require('@rollup/plugin-node-resolve');
+const nodePolyfills = require('rollup-plugin-polyfill-node');
 // @ts-expect-error: no published types.
 const shim = require('rollup-plugin-shim');
 const {terser} = require('rollup-plugin-terser');
@@ -26,6 +27,7 @@ const typescript = rollupPluginTypeCoerce(require('@rollup/plugin-typescript'));
 module.exports = {
   commonjs,
   nodeResolve,
+  nodePolyfills,
   shim,
   terser,
   typescript,
