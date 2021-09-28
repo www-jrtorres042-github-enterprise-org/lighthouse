@@ -138,6 +138,9 @@ async function build(entryPath, distPath, opts = {minify: true}) {
           'require(\'intl-messageformat\').default': 'require(\'intl-messageformat\')',
           // Rollup doesn't replace this, so let's manually change it to false.
           'require.main === module': 'false',
+          // TODO: Use globalThis directly.
+          'global.isLightrider': 'globalThis.isLightrider',
+          'global.isDevtools': 'globalThis.isDevtools',
         },
       }),
       rollupPlugins.alias({
