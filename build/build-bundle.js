@@ -198,19 +198,16 @@ async function build(entryPath, distPath, opts = {minify: true}) {
 
   await bundle.write({
     file: distPath,
-    banner: () => {
-      let result = banner;
-
-      // Add the banner and modify globals for DevTools if necessary.
-      if (isDevtools(entryPath) && !DEBUG) {
-        result += '\n// @ts-nocheck - Prevent tsc stepping into any required bundles.';
-      }
-
-      return result;
-    },
+    banner,
     format: 'iife',
     sourcemap: DEBUG,
   });
+
+  if (isDevtools(entryPath) && !DEBUG) {
+    const code = fs.readFileSync(distPath);
+    const newCode = '// @ts-nocheck - Prevent tsc stepping into any required bundles.\n' + code;
+    fs.writeFileSync(distPath, newCode);
+  }
 }
 
 /**
