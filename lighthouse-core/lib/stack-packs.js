@@ -14,7 +14,7 @@ const i18n = require('./i18n/i18n.js');
  * @param {string} module
  */
 function resolve(module) {
-  if (!require.resolve) {
+  if (!('resolve' in require)) {
     return `node_modules/${module}`;
   }
 
