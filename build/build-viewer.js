@@ -10,7 +10,6 @@ const browserify = require('browserify');
 const rollupPlugins = require('./rollup-plugins.js');
 const GhPagesApp = require('./gh-pages-app.js');
 const {minifyFileTransform} = require('./build-utils.js');
-const htmlReportAssets = require('../report/generator/report-assets.js');
 const {LH_ROOT} = require('../root.js');
 
 const localeBasenames = fs.readdirSync(LH_ROOT + '/lighthouse-core/lib/i18n/locales/');
@@ -44,7 +43,6 @@ async function run() {
     appDir: `${LH_ROOT}/lighthouse-viewer/app`,
     html: {path: 'index.html'},
     stylesheets: [
-      htmlReportAssets.REPORT_CSS,
       {path: 'styles/*'},
     ],
     javascripts: [

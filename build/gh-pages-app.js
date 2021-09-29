@@ -153,7 +153,6 @@ class GhPagesApp {
       rollupPlugins.commonjs(),
     ];
     if (!process.env.DEBUG) plugins.push(rollupPlugins.terser());
-
     const bundle = await rollup.rollup({
       input,
       plugins,
