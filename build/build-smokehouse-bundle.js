@@ -23,6 +23,11 @@ async function build() {
         [smokehouseCliFilename]:
           'export function runLighthouse() { throw new Error("not supported"); }',
       }),
+      // TODO(esmodules): brfs does not support es modules.
+      rollupPlugins.brfs({
+        global: true,
+        parserOpts: {ecmaVersion: 12, sourceType: 'module'},
+      }),
       rollupPlugins.commonjs(),
       rollupPlugins.nodePolyfills(),
       rollupPlugins.nodeResolve(),
