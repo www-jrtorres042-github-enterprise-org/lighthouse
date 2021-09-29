@@ -2319,10 +2319,10 @@
     "message": "Passed audits"
   },
   "report/renderer/util.js | runtimeDesktopEmulation": {
-    "message": "emulating desktop"
+    "message": "Emulating desktop"
   },
   "report/renderer/util.js | runtimeMobileEmulation": {
-    "message": "emulating a Moto G4"
+    "message": "Emulating a Moto G4"
   },
   "report/renderer/util.js | runtimeNoEmulation": {
     "message": "No emulation"
@@ -2333,32 +2333,17 @@
   "report/renderer/util.js | runtimeSettingsBenchmark": {
     "message": "CPU/Memory Power"
   },
-  "report/renderer/util.js | runtimeSettingsChannel": {
-    "message": "Channel"
-  },
   "report/renderer/util.js | runtimeSettingsCPUThrottling": {
     "message": "CPU throttling"
-  },
-  "report/renderer/util.js | runtimeSettingsDevice": {
-    "message": "Device"
-  },
-  "report/renderer/util.js | runtimeSettingsFetchTime": {
-    "message": "Fetch Time"
   },
   "report/renderer/util.js | runtimeSettingsNetworkThrottling": {
     "message": "Network throttling"
   },
-  "report/renderer/util.js | runtimeSettingsTitle": {
-    "message": "Runtime Settings"
-  },
-  "report/renderer/util.js | runtimeSettingsUA": {
-    "message": "User agent (host)"
-  },
   "report/renderer/util.js | runtimeSettingsUANetwork": {
     "message": "User agent (network)"
   },
-  "report/renderer/util.js | runtimeSettingsUrl": {
-    "message": "URL"
+  "report/renderer/util.js | runtimeSingleLoad": {
+    "message": "Single load"
   },
   "report/renderer/util.js | runtimeUnknown": {
     "message": "Unknown"

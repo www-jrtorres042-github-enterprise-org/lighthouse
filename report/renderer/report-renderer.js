@@ -117,17 +117,18 @@ export class ReportRenderer {
       ['date', `Captured at ${Util.i18n.formatDateTime(report.fetchTime)}`],
       [
         'devices',
-        `Lighthouse ${report.lighthouseVersion}, ${envValues.deviceEmulation}`,
+        `Lighthouse ${report.lighthouseVersion}. ${envValues.deviceEmulation}`,
         `${Util.i18n.strings.runtimeSettingsBenchmark}: ${benchmarkIndex}` +
-            `\nCPU throttling: ${envValues.cpuThrottling}` +
+            `\n${Util.i18n.strings.runtimeSettingsCPUThrottling}: ${envValues.cpuThrottling}` +
             (axeVersion ? `\n${Util.i18n.strings.runtimeSettingsAxeVersion}: ${axeVersion}` : ''),
       ],
-      ['samples-one', `Single load`],
+      ['samples-one', Util.i18n.strings.runtimeSingleLoad],
 
       ['stopwatch', `${Util.i18n.formatSeconds(pageloadDurationMs)} of load`],
-      ['networkspeed', `${envValues.summary}`, envValues.networkThrottling],
+      ['networkspeed', `${envValues.summary}`,
+        `${Util.i18n.strings.runtimeSettingsNetworkThrottling}: ${envValues.networkThrottling}`],
       ['chrome', `Using ${chromeVer}` + (channel ? ` with ${channel}` : ''),
-        `Emulated userAgent: "${report?.environment.networkUserAgent}"`],
+        `${Util.i18n.strings.runtimeSettingsUANetwork}: "${report.environment.networkUserAgent}"`],
     ];
 
     const metaItemsEl = this._dom.find('.lh-meta__items', footer);
