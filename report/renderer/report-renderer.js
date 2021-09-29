@@ -99,13 +99,17 @@ export class ReportRenderer {
   _renderMetaBlock(report, footer) {
     const envValues = Util.getEmulationDescriptions(report.configSettings || {});
 
-    const axeVersion = report.environment.credits['axe-core'];
+
     const match = report.userAgent.match(/(\w*Chrome\/[\d.]+)/); // \w* to include 'HeadlessChrome'
-    const chromeVer = Array.isArray(match) ? match[1].replace('/', ' ') : 'Chrome';
+    const chromeVer = Array.isArray(match)
+      ? match[1].replace('/', ' ').replace('Chrome', 'Chromium')
+      : 'Chromium';
     const pageloadDurationMs = Math.max(
       report.timing.entries.find(e => e.name === 'lh:gather:loadPage-defaultPass')?.duration || 0,
       report.audits.interactive.numericValue || 0
     );
+    const channel = report.configSettings.channel;
+    const axeVersion = report.environment.credits['axe-core'];
 
     // [CSS icon class, textContent, tooltipText]
     const metaItems = [
@@ -117,11 +121,11 @@ export class ReportRenderer {
             `CPU throttling: ${envValues.cpuThrottling}. ` +
             `${Util.i18n.strings.runtimeSettingsAxeVersion}: ${axeVersion}`,
       ],
-      ['samples-one', `Singular load from ${report.configSettings.channel}`],
+      ['samples-one', `Single load`],
 
       ['stopwatch', `${Util.i18n.formatSeconds(pageloadDurationMs)} of load`],
       ['networkspeed', `${envValues.summary}`, envValues.networkThrottling],
-      ['chrome', `Using ${chromeVer}`,
+      ['chrome', `Using ${chromeVer}` + (channel ? ` with ${channel}` : ''),
         `Emulated userAgent: "${report?.environment.networkUserAgent}"`],
     ];
 

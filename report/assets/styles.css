@@ -189,7 +189,7 @@
     --color-informative: var(--color-blue-200);
 
     /* Component variables */
-    --env-item-background-color: var(--color-gray);
+    --env-item-background-color: #393535;
     --plugin-badge-background-color: var(--color-gray-800);
     --report-background-color: var(--color-gray-900);
     --report-border-color-secondary: var(--color-gray-200);
