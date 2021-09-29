@@ -106,7 +106,7 @@ export class ReportRenderer {
       : 'Chromium';
     const pageloadDurationMs = Math.max(
       report.timing.entries.find(e => e.name === 'lh:gather:loadPage-defaultPass')?.duration || 0,
-      report.audits.interactive.numericValue || 0
+      report.audits?.interactive?.numericValue || 0
     );
     const channel = report.configSettings.channel;
     const benchmarkIndex = report.environment.benchmarkIndex.toFixed(0);
@@ -117,7 +117,7 @@ export class ReportRenderer {
       ['date', `Captured at ${Util.i18n.formatDateTime(report.fetchTime)}`],
       [
         'devices',
-        `Lighthouse ${report.lighthouseVersion}. ${envValues.deviceEmulation}`,
+        `${envValues.deviceEmulation} with Lighthouse ${report.lighthouseVersion}`,
         `${Util.i18n.strings.runtimeSettingsBenchmark}: ${benchmarkIndex}` +
             `\n${Util.i18n.strings.runtimeSettingsCPUThrottling}: ${envValues.cpuThrottling}` +
             (axeVersion ? `\n${Util.i18n.strings.runtimeSettingsAxeVersion}: ${axeVersion}` : ''),

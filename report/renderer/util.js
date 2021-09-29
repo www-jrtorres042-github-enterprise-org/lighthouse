@@ -621,9 +621,9 @@ Util.UIStrings = {
   /** Descriptive explanation for emulation setting when no device emulation is set. */
   runtimeNoEmulation: 'No emulation',
   /** Descriptive explanation for emulation setting when emulating a Moto G4 mobile device. */
-  runtimeMobileEmulation: 'Emulating a Moto G4',
+  runtimeMobileEmulation: 'Emulated Moto G4',
   /** Descriptive explanation for emulation setting when emulating a generic desktop form factor, as opposed to a mobile-device like form factor. */
-  runtimeDesktopEmulation: 'Emulating desktop',
+  runtimeDesktopEmulation: 'Emulated Desktop',
   /** Descriptive explanation for a runtime setting that is set to an unknown value. */
   runtimeUnknown: 'Unknown',
   /** Descriptive explanation that this analysis run was from a single pageload of a browser (not a summary of hundreds of loads) */
