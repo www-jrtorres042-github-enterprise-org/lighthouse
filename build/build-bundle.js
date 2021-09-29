@@ -57,7 +57,7 @@ const banner = `
 `.trim();
 
 /**
- * Browserify starting at entryPath, writing the minified result to distPath.
+ * Bundle starting at entryPath, writing the minified result to distPath.
  * @param {string} entryPath
  * @param {string} distPath
  * @param {{minify: boolean}=} opts
