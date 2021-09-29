@@ -1696,11 +1696,13 @@
   display: none; /* Don't retain these layers when not needed */
   opacity: 0;
   background: #ffffff;
+  white-space: pre-line; /* Render newlines in the text */
   min-width: 246px;
   max-width: 275px;
   padding: 15px;
   border-radius: 5px;
   text-align: initial;
+  line-height: 1.4;
 }
 /* shrink tooltips to not be cutoff on left edge of narrow viewports
    45vw is chosen to be ~= width of the left column of metrics
@@ -1710,10 +1712,6 @@
     min-width: 45vw;
     padding: 3vw;
   }
-}
-
-.lh-tooltip-boundary:hover {
-  background-color: var(--color-hover);
 }
 
 .lh-tooltip-boundary:hover .lh-tooltip {
@@ -1816,8 +1814,8 @@
   padding: calc(var(--default-padding) / 2) 0 0 calc(var(--default-padding) * 3);
 }
 
-.lh-meta__item[title] {
-  text-decoration: dotted underline var(--color-gray-300);
+.lh-meta__item.lh-tooltip-boundary {
+  text-decoration: dotted underline var(--color-gray-500);
 }
 
 .lh-meta__item.lh-report-icon::before {
@@ -1829,6 +1827,15 @@
 
 .lh-meta__item.lh-report-icon:hover::before {
   opacity: unset;
+}
+
+.lh-meta__item .lh-tooltip {
+  color: var(--color-gray-800);
+}
+
+.lh-meta__item .lh-tooltip::before {
+  right: auto; /* Set the tooltip arrow to the leftside */
+  left: 6px;
 }
 
 /* Change the grid for narrow viewport. */

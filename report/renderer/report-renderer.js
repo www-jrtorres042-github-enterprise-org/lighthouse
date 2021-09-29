@@ -109,6 +109,7 @@ export class ReportRenderer {
       report.audits.interactive.numericValue || 0
     );
     const channel = report.configSettings.channel;
+    const benchmarkIndex = report.environment.benchmarkIndex.toFixed(0);
     const axeVersion = report.environment.credits['axe-core'];
 
     // [CSS icon class, textContent, tooltipText]
@@ -117,9 +118,9 @@ export class ReportRenderer {
       [
         'devices',
         `Lighthouse ${report.lighthouseVersion}, ${envValues.deviceEmulation}`,
-        `Host CPU Power: ${report?.environment.benchmarkIndex.toFixed(0)}. ` +
-            `CPU throttling: ${envValues.cpuThrottling}. ` +
-            `${Util.i18n.strings.runtimeSettingsAxeVersion}: ${axeVersion}`,
+        `${Util.i18n.strings.runtimeSettingsBenchmark}: ${benchmarkIndex}` +
+            `\nCPU throttling: ${envValues.cpuThrottling}` +
+            (axeVersion ? `\n${Util.i18n.strings.runtimeSettingsAxeVersion}: ${axeVersion}` : ''),
       ],
       ['samples-one', `Single load`],
 
@@ -134,7 +135,9 @@ export class ReportRenderer {
       const itemEl = this._dom.createChildOf(metaItemsEl, 'li', 'lh-meta__item');
       itemEl.textContent = text;
       if (tooltip) {
-        itemEl.title = tooltip;
+        itemEl.classList.add('lh-tooltip-boundary');
+        const tooltipEl = this._dom.createChildOf(itemEl, 'div', 'lh-tooltip');
+        tooltipEl.textContent = tooltip;
       }
       itemEl.classList.add('lh-report-icon', `lh-report-icon--${iconname}`);
     }
