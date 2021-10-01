@@ -11,10 +11,14 @@ import {render} from '@testing-library/preact';
 import {Topbar} from '../src/topbar';
 import {FlowResultContext} from '../src/util';
 import {ReportRendererContext} from '../src/wrappers/report-renderer';
+import {I18nProvider} from '../src/i18n/i18n';
 
 const flowResult = {
   name: 'User flow',
-  steps: [{lhr: {fetchTime: '2021-09-14T22:24:22.462Z'}}],
+  steps: [{lhr: {
+    fetchTime: '2021-09-14T22:24:22.462Z',
+    configSettings: {locale: 'en-US'},
+  }}],
 } as any;
 
 let wrapper: FunctionComponent;
@@ -30,7 +34,9 @@ beforeEach(() => {
   wrapper = ({children}) => (
     <FlowResultContext.Provider value={flowResult}>
       <ReportRendererContext.Provider value={reportRendererValue}>
-        {children}
+        <I18nProvider>
+          {children}
+        </I18nProvider>
       </ReportRendererContext.Provider>
     </FlowResultContext.Provider>
   );
