@@ -13,7 +13,6 @@
 import {DropDownMenu} from './drop-down-menu.js';
 import {toggleDarkTheme} from './features-util.js';
 import {openViewer, openViewerAndSendData} from './open-tab.js';
-import {getLhrFilenamePrefix} from '../generator/file-namer.js';
 
 export class TopbarFeatures {
   /**
@@ -105,21 +104,13 @@ export class TopbarFeatures {
         break;
       case 'save-json': {
         const jsonStr = JSON.stringify(this.lhr, null, 2);
-        const filename = getLhrFilenamePrefix(this._reportUIFeatures.json);
-        this._dom.saveFile(
-          new Blob([jsonStr], {type: 'application/json'}),
-          filename
-        );
+        this._reportUIFeatures._saveFile(new Blob([jsonStr], {type: 'application/json'}));
         break;
       }
       case 'save-html': {
         const htmlStr = this._reportUIFeatures.getReportHtml();
-        const filename = getLhrFilenamePrefix(this._reportUIFeatures.json);
         try {
-          this._dom.saveFile(
-            new Blob([htmlStr], {type: 'text/html'}),
-            filename
-          );
+          this._reportUIFeatures._saveFile(new Blob([htmlStr], {type: 'text/html'}));
         } catch (e) {
           this._dom.fireEventOn('lh-log', this._document, {
             cmd: 'error', msg: 'Could not export as HTML. ' + e.message,

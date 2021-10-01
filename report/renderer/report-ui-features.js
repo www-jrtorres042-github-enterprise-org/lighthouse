@@ -28,6 +28,7 @@ import {toggleDarkTheme} from './features-util.js';
 import {openTreemap} from './open-tab.js';
 import {TopbarFeatures} from './topbar-features.js';
 import {Util} from './util.js';
+import {getLhrFilenamePrefix} from '../generator/file-namer.js';
 
 /**
  * @param {HTMLTableElement} tableEl
@@ -320,5 +321,15 @@ export class ReportUIFeatures {
     }
 
     return thirdPartyRows;
+  }
+
+  /**
+   * Wrapper is redefined and used by DevTools.
+   *
+   * @param {Blob|File} blob
+   */
+  _saveFile(blob) {
+    const filename = getLhrFilenamePrefix(this.json);
+    this._dom.saveFile(blob, filename);
   }
 }
