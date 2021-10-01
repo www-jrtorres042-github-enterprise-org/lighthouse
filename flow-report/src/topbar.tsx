@@ -7,6 +7,7 @@
 import {FunctionComponent, JSX} from 'preact';
 
 import {getFilenamePrefix} from '../../report/generator/file-namer';
+import {useUIStrings} from './i18n/i18n';
 import {HamburgerIcon} from './icons';
 import {useFlowResult} from './util';
 import {useReportRenderer} from './wrappers/report-renderer';
@@ -73,6 +74,7 @@ export const Topbar: FunctionComponent<{onMenuClick: JSX.MouseEventHandler<HTMLB
 ({onMenuClick}) => {
   const flowResult = useFlowResult();
   const {dom} = useReportRenderer();
+  const strings = useUIStrings();
 
   return (
     <div className="Topbar">
@@ -82,7 +84,7 @@ export const Topbar: FunctionComponent<{onMenuClick: JSX.MouseEventHandler<HTMLB
       <div className="Topbar__logo">
         <Logo/>
       </div>
-      <div className="Topbar__title">Lighthouse User Flow Report</div>
+      <div className="Topbar__title">{strings.title}</div>
       <TopbarButton onClick={() => saveHtml(flowResult, dom)}>Save</TopbarButton>
     </div>
   );
