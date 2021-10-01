@@ -8,7 +8,6 @@ import {FunctionComponent, JSX} from 'preact';
 
 import {useUIStrings} from './i18n/i18n';
 import {CloseIcon, NavigationIcon, SnapshotIcon, TimespanIcon} from './icons';
-import {classNames} from './util';
 
 const HelpDialogColumn: FunctionComponent<{
   icon: JSX.Element,
@@ -53,14 +52,13 @@ const HelpDialogColumn: FunctionComponent<{
   );
 };
 
-export const HelpDialog: FunctionComponent<{visible: boolean; onClose: () => void}> = ({
-  visible,
+export const HelpDialog: FunctionComponent<{onClose: () => void}> = ({
   onClose,
 }) => {
   const strings = useUIStrings();
 
   return (
-    <div className={classNames('HelpDialog', {'HelpDialog--hidden': !visible})}>
+    <div className="HelpDialog">
       <div className="HelpDialog__title">
         <div>{strings.helpDialogTitle}</div>
         <div style={{flexGrow: 1}} />

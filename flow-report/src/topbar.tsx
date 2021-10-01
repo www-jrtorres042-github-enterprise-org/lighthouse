@@ -74,7 +74,10 @@ export const Topbar: FunctionComponent<{onMenuClick: JSX.MouseEventHandler<HTMLD
       <TopbarButton onClick={() => setShowHelpDialog(previous => !previous)}>
         {strings.helpLabel}
       </TopbarButton>
-      <HelpDialog visible={showHelpDialog} onClose={() => setShowHelpDialog(false)} />
+      {showHelpDialog ?
+        <HelpDialog onClose={() => setShowHelpDialog(false)} /> :
+        null
+      }
     </div>
   );
 };
