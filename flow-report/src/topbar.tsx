@@ -85,7 +85,7 @@ export const Topbar: FunctionComponent<{onMenuClick: JSX.MouseEventHandler<HTMLB
         <Logo/>
       </div>
       <div className="Topbar__title">{strings.title}</div>
-      <TopbarButton onClick={() => saveHtml(flowResult, dom)}>Save</TopbarButton>
+      <TopbarButton onClick={() => saveHtml(flowResult, dom)}>{strings.save}</TopbarButton>
     </div>
   );
 };
