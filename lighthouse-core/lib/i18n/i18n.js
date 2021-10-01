@@ -9,8 +9,7 @@
 
 const path = require('path');
 const lookupClosestLocale = require('lookup-closest-locale');
-// TODO(bckenny): drop LOCALES reference
-const LOCALES = require('../../../shared/localization/locales.js');
+const {getAvailableLocales} = require('../../../shared/localization/format.js');
 const log = require('lighthouse-logger');
 const {LH_ROOT} = require('../../../root.js');
 const {isIcuMessage, _formatMessage} = require('../../../shared/localization/format.js');
@@ -134,7 +133,12 @@ function lookupLocale(locales) {
   // Filter by what's available in this runtime.
   const availableLocales = Intl.NumberFormat.supportedLocalesOf(canonicalLocales);
 
-  const closestLocale = lookupClosestLocale(availableLocales, LOCALES);
+  // Get available locales and transform into object to match `lookupClosestLocale`'s API.
+  const localesWithMessages = getAvailableLocales();
+  const localesWithmessagesObj = /** @type {Record<LH.Locale, LhlMessages>} */ (
+    Object.fromEntries(localesWithMessages.map(l => [l, {}])));
+
+  const closestLocale = lookupClosestLocale(availableLocales, localesWithmessagesObj);
 
   if (!closestLocale) {
     // Log extra info if we're pretty sure this version of Node was built with `--with-intl=small-icu`.
@@ -178,7 +182,6 @@ function createIcuMessageFn(filename, fileStrings) {
     return {
       i18nId,
       values,
-      // @ts-ignore - TODO(bckenny): figure out sharing this with format.js
       formattedDefault: _formatMessage(message, values, DEFAULT_LOCALE),
     };
   };

@@ -5,11 +5,21 @@
  */
 'use strict';
 
+const fs = require('fs');
+
 const MessageFormat = require('intl-messageformat').default;
 const {isObjectOfUnknownValues, isObjectOrArrayOfUnknownValues} = require('../type-verifiers.js');
 
-/** Locales with messages. May be an empty object if bundled that way. */
-const LOCALES = require('./locales.js');
+/** Contains available locales with messages. May be an empty object if bundled. */
+const LOCALE_MESSAGES = require('./locales.js');
+
+/**
+ * The locale tags for the localized messages available to Lighthouse on disk.
+ * When bundled, these will be inlined by brfs.
+ */
+const DEFAULT_LOCALES = fs.readdirSync(__dirname + '/locales/')
+  .filter(basename => basename.endsWith('.json') && !basename.endsWith('.ctc.json'))
+  .map(locale => locale.replace('.json', ''));
 
 /** @typedef {import('intl-messageformat-parser').Element} MessageElement */
 /** @typedef {import('intl-messageformat-parser').ArgumentElement} ArgumentElement */
@@ -144,7 +154,9 @@ function _preformatValues(messageFormatter, values, lhlMessage) {
 }
 
 /**
- * Format string `message` by localizing `values` and inserting them.
+ * Format string `message` by localizing `values` and inserting them. `message`
+ * is assumed to already be in the given locale.
+ * If you need to localize a messagem `getFormatted` is probably what you want.
  * @param {string} message
  * @param {Record<string, string | number>} values
  * @param {LH.Locale} locale
@@ -170,7 +182,7 @@ function _formatMessage(message, values = {}, locale) {
  * @return {string}
  */
 function _localizeIcuMessage(icuMessage, locale) {
-  const localeMessages = LOCALES[locale];
+  const localeMessages = LOCALE_MESSAGES[locale];
   if (!localeMessages) throw new Error(`Unsupported locale '${locale}'`);
   const localeMessage = localeMessages[icuMessage.i18nId];
 
@@ -190,7 +202,7 @@ function _localizeIcuMessage(icuMessage, locale) {
  * @return {Record<string, string>}
  */
 function getRendererFormattedStrings(locale) {
-  const localeMessages = LOCALES[locale];
+  const localeMessages = LOCALE_MESSAGES[locale];
   if (!localeMessages) throw new Error(`Unsupported locale '${locale}'`);
 
   const icuMessageIds = Object.keys(localeMessages).filter(f => f.startsWith('report/'));
@@ -337,9 +349,26 @@ function replaceIcuMessages(inputObject, locale) {
  */
 function hasLocale(requestedLocale) {
   const hasIntlSupport = Intl.NumberFormat.supportedLocalesOf([requestedLocale]).length > 0;
-  const hasMessages = Boolean(LOCALES[requestedLocale]);
+  const hasMessages = Boolean(LOCALE_MESSAGES[requestedLocale]);
 
   return hasIntlSupport && hasMessages;
+}
+
+/**
+ * Returns a list of available locales.
+ *  - if full build, this includes all default locales, aliases, and any locale added
+ *      via `registerLocaleData`.
+ *  - if bundled and locale messages have been stripped, this includes default locales
+ *      (perhaps available in a separate bundle) and any locales from `registerLocaleData`.
+ * @return {Array<LH.Locale>}
+ */
+function getAvailableLocales() {
+  // Take union of DEFAULT_LOCALES and keys of LOCALE_MESSAGES. This means that
+  // the default locales will always be included (even if trimmed by a bundler)
+  // as well as those added by `registerLocaleData`.
+  const allLocales = new Set([...DEFAULT_LOCALES, ...Object.keys(LOCALE_MESSAGES)]);
+  // Note: cast because this is in theory correct, but not tested at runtime.
+  return /** @type {Array<LH.Locale>} */ ([...allLocales].sort());
 }
 
 /**
@@ -350,7 +379,7 @@ function hasLocale(requestedLocale) {
  * @param {import('./locales').LhlMessages} lhlMessages
  */
 function registerLocaleData(locale, lhlMessages) {
-  LOCALES[locale] = lhlMessages;
+  LOCALE_MESSAGES[locale] = lhlMessages;
 }
 
 /**
@@ -375,4 +404,5 @@ module.exports = {
   registerLocaleData,
   _formatMessage,
   getIcuMessageIdParts,
+  getAvailableLocales,
 };
