@@ -5,7 +5,9 @@
  */
 
 import {FunctionComponent, JSX} from 'preact';
+import {useState} from 'preact/hooks';
 
+import {HelpDialog} from './help-dialog';
 import {useUIStrings} from './i18n/i18n';
 import {HamburgerIcon} from './icons';
 
@@ -45,9 +47,19 @@ const Logo: FunctionComponent = () => {
 };
 /* eslint-enable max-len */
 
+const TopbarButton: FunctionComponent<{onClick: JSX.MouseEventHandler<HTMLButtonElement>}> =
+({onClick, children}) => {
+  return (
+    <button className="TopbarButton" onClick={onClick} data-testid="TopbarButton">
+      {children}
+    </button>
+  );
+};
+
 export const Topbar: FunctionComponent<{onMenuClick: JSX.MouseEventHandler<HTMLDivElement>}> =
 ({onMenuClick}) => {
   const strings = useUIStrings();
+  const [showHelpDialog, setShowHelpDialog] = useState(false);
 
   return (
     <div className="Topbar">
@@ -58,6 +70,11 @@ export const Topbar: FunctionComponent<{onMenuClick: JSX.MouseEventHandler<HTMLD
         <Logo/>
       </div>
       <div className="Topbar__title">{strings.title}</div>
+      <div style={{flexGrow: 1}} />
+      <TopbarButton onClick={() => setShowHelpDialog(previous => !previous)}>
+        {strings.helpLabel}
+      </TopbarButton>
+      <HelpDialog visible={showHelpDialog} onClose={() => setShowHelpDialog(false)} />
     </div>
   );
 };
