@@ -40,10 +40,8 @@ it('toggles collapsed mode when hamburger button clicked', async () => {
   const root = render(<App flowResult={flowResult}/>);
 
   const app = root.getByTestId('App');
-  const topbarButtons = root.getAllByTestId('TopbarButton');
-  const hamburgerButton = topbarButtons[0];
+  const hamburgerButton = root.getByLabelText('Button that opens and closes the sidebar');
 
-  expect(hamburgerButton.innerHTML).toMatch(/<svg.*<\/svg>/);
   expect(app.classList).not.toContain('App--collapsed');
 
   await act(() => {

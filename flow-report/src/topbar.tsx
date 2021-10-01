@@ -61,10 +61,13 @@ const Logo: FunctionComponent = () => {
 };
 /* eslint-enable max-len */
 
-const TopbarButton: FunctionComponent<{onClick: JSX.MouseEventHandler<HTMLButtonElement>}> =
-({onClick, children}) => {
+const TopbarButton: FunctionComponent<{
+  onClick: JSX.MouseEventHandler<HTMLButtonElement>,
+  label: string,
+}> =
+({onClick, label, children}) => {
   return (
-    <button className="TopbarButton" onClick={onClick} data-testid="TopbarButton">
+    <button className="TopbarButton" onClick={onClick} aria-label={label}>
       {children}
     </button>
   );
@@ -78,14 +81,17 @@ export const Topbar: FunctionComponent<{onMenuClick: JSX.MouseEventHandler<HTMLB
 
   return (
     <div className="Topbar">
-      <TopbarButton onClick={onMenuClick}>
+      <TopbarButton onClick={onMenuClick} label="Button that opens and closes the sidebar">
         <HamburgerIcon/>
       </TopbarButton>
       <div className="Topbar__logo">
         <Logo/>
       </div>
       <div className="Topbar__title">{strings.title}</div>
-      <TopbarButton onClick={() => saveHtml(flowResult, dom)}>{strings.save}</TopbarButton>
+      <TopbarButton
+        onClick={() => saveHtml(flowResult, dom)}
+        label="Button that saves the report as HTML"
+      >{strings.save}</TopbarButton>
     </div>
   );
 };
