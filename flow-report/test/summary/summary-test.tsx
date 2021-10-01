@@ -4,24 +4,14 @@
  * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
  */
 
-import fs from 'fs';
-import {dirname} from 'path';
-import {fileURLToPath} from 'url';
-
 import {render} from '@testing-library/preact';
 import {FunctionComponent} from 'preact';
 
+import {I18nProvider} from '../../src/i18n/i18n';
 import {SummaryHeader, SummaryFlowStep} from '../../src/summary/summary';
 import {FlowResultContext} from '../../src/util';
 import {ReportRendererProvider} from '../../src/wrappers/report-renderer';
-
-const flowResult: LH.FlowResult = JSON.parse(
-  fs.readFileSync(
-    // eslint-disable-next-line max-len
-    `${dirname(fileURLToPath(import.meta.url))}/../../../lighthouse-core/test/fixtures/fraggle-rock/reports/sample-lhrs.json`,
-    'utf-8'
-  )
-);
+import {flowResult} from '../sample-flow';
 
 let wrapper: FunctionComponent;
 
@@ -29,7 +19,9 @@ beforeEach(() => {
   wrapper = ({children}) => (
     <FlowResultContext.Provider value={flowResult}>
       <ReportRendererProvider>
-        {children}
+        <I18nProvider>
+          {children}
+        </I18nProvider>
       </ReportRendererProvider>
     </FlowResultContext.Provider>
   );
@@ -59,7 +51,8 @@ describe('SummaryFlowStep', () => {
 
     expect(root.getByText('Navigation (1)')).toBeTruthy();
 
-    const screenshot = root.getByTestId('SummaryFlowStep__screenshot') as HTMLImageElement;
+    const screenshot =
+      root.getByAltText('Screenshot of a page tested by Lighthouse') as HTMLImageElement;
     expect(screenshot.src).toMatch(/data:image\/jpeg;base64/);
 
     const gauges = root.getAllByTestId('CategoryScore');
@@ -86,8 +79,7 @@ describe('SummaryFlowStep', () => {
 
     expect(root.getByText('Timespan (1)')).toBeTruthy();
 
-    const screenshot = root.getByTestId('SummaryFlowStep__screenshot') as HTMLImageElement;
-    expect(screenshot.src).toBeFalsy();
+    expect(() => root.getByAltText('Screenshot of a page tested by Lighthouse')).toThrow();
 
     // Accessibility and SEO are missing in timespan.
     const nullCategories = root.getAllByTestId('SummaryCategory__null');
@@ -115,7 +107,8 @@ describe('SummaryFlowStep', () => {
 
     expect(root.getByText('Snapshot (1)')).toBeTruthy();
 
-    const screenshot = root.getByTestId('SummaryFlowStep__screenshot') as HTMLImageElement;
+    const screenshot =
+      root.getByAltText('Screenshot of a page tested by Lighthouse') as HTMLImageElement;
     expect(screenshot.src).toMatch(/data:image\/jpeg;base64/);
 
     const gauges = root.getAllByTestId('CategoryScore');
