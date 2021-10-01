@@ -31,8 +31,9 @@ function cleanAndFormatLHR(lhrString) {
   // 2) CI gets a absolute path during yarn diff:sample-json
   lhr.configSettings.auditMode = true;
 
-  // Set timing values, which change from run to run, to predictable values
+  // Set timing values, which change from run to run, to predictable values and order
   lhr.timing.total = 12345.6789;
+  lhr.timing.entries.sort((a, b) => a.startTime - b.startTime);
   lhr.timing.entries.forEach(entry => {
     // @ts-expect-error - write to readonly property
     entry.duration = 100;
