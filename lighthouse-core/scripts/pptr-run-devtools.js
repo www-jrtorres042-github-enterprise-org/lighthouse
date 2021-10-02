@@ -102,13 +102,12 @@ const startLighthouse = `
 `;
 
 /**
+ * @param {import('puppeteer').Page} page
  * @param {import('puppeteer').Browser} browser
  * @param {string} url
  * @return {Promise<string>}
  */
-async function testPage(browser, url) {
-  const page = await browser.newPage();
-
+async function testPage(page, browser, url) {
   const targets = await browser.targets();
   const inspectorTarget = targets.filter(t => t.url().includes('devtools'))[1];
   if (!inspectorTarget) throw new Error('No inspector found.');
@@ -143,10 +142,10 @@ async function testPage(browser, url) {
     awaitPromise: true,
     returnByValue: true,
   }).catch(err => err);
-  // Verify the first parameter to `startLighthouse`, which should be our url.
-  // Normalize our url with `URL`.
-  if (lhStartedResponse.result.value !== new URL(url).href) {
-    console.log(url);
+  // Verify the first parameter to `startLighthouse`, which should be a url.
+  // Don't try to check the exact value (because of redirects and such), just
+  // make sure it exists.
+  if (!lhStartedResponse.result.value) {
     throw new Error(`Lighthouse did not started correctly. Got unexpected value for url: ${
       lhStartedResponse.result.value}`);
   }
@@ -161,8 +160,6 @@ async function testPage(browser, url) {
   if (!remoteLhrResponse.result || !remoteLhrResponse.result.value) {
     throw new Error('Problem sniffing LHR.');
   }
-
-  await page.close();
 
   return JSON.stringify(remoteLhrResponse.result.value, null, 2);
 }
@@ -209,13 +206,16 @@ async function run() {
   let errorCount = 0;
   const urlList = await readUrlList();
   for (let i = 0; i < urlList.length; ++i) {
+    const page = await browser.newPage();
     try {
-      const lhr = await testPage(browser, urlList[i]);
+      const lhr = await testPage(page, browser, urlList[i]);
       fs.writeFileSync(`${argv.o}/lhr-${i}.json`, lhr);
     } catch (error) {
       errorCount += 1;
       console.error(error.message);
       fs.writeFileSync(`${argv.o}/lhr-${i}.json`, JSON.stringify({error: error.message}, null, 2));
+    } finally {
+      await page.close();
     }
   }
   console.log(`${urlList.length - errorCount} / ${urlList.length} urls run successfully.`);
