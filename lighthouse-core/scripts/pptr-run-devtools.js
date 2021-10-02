@@ -75,8 +75,18 @@ const sniffLhr = `
 new Promise(resolve => {
   (${addSniffer.toString()})(
     UI.panels.lighthouse.__proto__,
-    '_buildReportUI',
+    'buildReportUI',
     (lhr, artifacts) => resolve(lhr)
+  );
+});
+`;
+
+const sniffLighthouseStarted = `
+new Promise(resolve => {
+  (${addSniffer.toString()})(
+    UI.panels.lighthouse.protocolService.__proto__,
+    'startLighthouse',
+    (inspectedURL) => resolve(inspectedURL)
   );
 });
 `;
@@ -125,6 +135,20 @@ async function testPage(browser, url) {
       expression: startLighthouse,
       awaitPromise: true,
     }).catch(err => ({exceptionDetails: err}));
+  }
+
+  /** @type {puppeteer.Protocol.Runtime.EvaluateResponse} */
+  const lhStartedResponse = await session.send('Runtime.evaluate', {
+    expression: sniffLighthouseStarted,
+    awaitPromise: true,
+    returnByValue: true,
+  }).catch(err => err);
+  // Verify the first parameter to `startLighthouse`, which should be our url.
+  // Normalize our url with `URL`.
+  if (lhStartedResponse.result.value !== new URL(url).href) {
+    console.log(url);
+    throw new Error(`Lighthouse did not started correctly. Got unexpected value for url: ${
+      lhStartedResponse.result.value}`);
   }
 
   /** @type {puppeteer.Protocol.Runtime.EvaluateResponse} */
@@ -182,15 +206,19 @@ async function run() {
     devtools: true,
   });
 
+  let errorCount = 0;
   const urlList = await readUrlList();
   for (let i = 0; i < urlList.length; ++i) {
     try {
       const lhr = await testPage(browser, urlList[i]);
       fs.writeFileSync(`${argv.o}/lhr-${i}.json`, lhr);
     } catch (error) {
+      errorCount += 1;
+      console.error(error.message);
       fs.writeFileSync(`${argv.o}/lhr-${i}.json`, JSON.stringify({error: error.message}, null, 2));
     }
   }
+  console.log(`${urlList.length - errorCount} / ${urlList.length} urls run successfully.`);
 
   await browser.close();
 }
