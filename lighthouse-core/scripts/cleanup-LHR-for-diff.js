@@ -46,6 +46,6 @@ function cleanAndFormatLHR(lhrString) {
       auditResult.description = '**Excluded from diff**';
     }
   }
-  // Ensure we have a final newline to confirm to .editorconfig
+  // Ensure we have a final newline to conform to .editorconfig
   return `${JSON.stringify(lhr, null, 2)}\n`;
 }
