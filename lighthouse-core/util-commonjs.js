@@ -390,43 +390,21 @@ class Util {
     return hostname.split('.').slice(-splitTld.length).join('.');
   }
 
-  /**
-   * @param {LH.Result['configSettings']} settings
-   * @return {!Array<{name: string, description: string}>}
-   */
-  static getEnvironmentDisplayValues(settings) {
-    const emulationDesc = Util.getEmulationDescriptions(settings);
-
-    return [
-      {
-        name: Util.i18n.strings.runtimeSettingsDevice,
-        description: emulationDesc.deviceEmulation,
-      },
-      {
-        name: Util.i18n.strings.runtimeSettingsNetworkThrottling,
-        description: emulationDesc.networkThrottling,
-      },
-      {
-        name: Util.i18n.strings.runtimeSettingsCPUThrottling,
-        description: emulationDesc.cpuThrottling,
-      },
-    ];
-  }
 
   /**
    * @param {LH.Result['configSettings']} settings
-   * @return {{deviceEmulation: string, networkThrottling: string, cpuThrottling: string}}
+   * @return {!{deviceEmulation: string, networkThrottling: string, cpuThrottling: string, summary: string}}
    */
   static getEmulationDescriptions(settings) {
     let cpuThrottling;
     let networkThrottling;
+    let summary;
 
     const throttling = settings.throttling;
 
     switch (settings.throttlingMethod) {
       case 'provided':
-        cpuThrottling = Util.i18n.strings.throttlingProvided;
-        networkThrottling = Util.i18n.strings.throttlingProvided;
+        summary = networkThrottling = cpuThrottling = Util.i18n.strings.throttlingProvided;
         break;
       case 'devtools': {
         const {cpuSlowdownMultiplier, requestLatencyMs} = throttling;
@@ -434,6 +412,9 @@ class Util {
         networkThrottling = `${Util.i18n.formatNumber(requestLatencyMs)}${NBSP}ms HTTP RTT, ` +
           `${Util.i18n.formatNumber(throttling.downloadThroughputKbps)}${NBSP}Kbps down, ` +
           `${Util.i18n.formatNumber(throttling.uploadThroughputKbps)}${NBSP}Kbps up (DevTools)`;
+
+        const isSlow4G = requestLatencyMs === 150 * 3.75;
+        summary = `${isSlow4G ? 'Slow 4G' : 'Custom'} throttling by DevTools`;
         break;
       }
       case 'simulate': {
@@ -441,11 +422,12 @@ class Util {
         cpuThrottling = `${Util.i18n.formatNumber(cpuSlowdownMultiplier)}x slowdown (Simulated)`;
         networkThrottling = `${Util.i18n.formatNumber(rttMs)}${NBSP}ms TCP RTT, ` +
           `${Util.i18n.formatNumber(throughputKbps)}${NBSP}Kbps throughput (Simulated)`;
+        const isSlow4G = rttMs === 150;
+        summary = isSlow4G ? 'Simulated slow 4G' : 'Custom simulated throttling';
         break;
       }
       default:
-        cpuThrottling = Util.i18n.strings.runtimeUnknown;
-        networkThrottling = Util.i18n.strings.runtimeUnknown;
+        summary = cpuThrottling = networkThrottling = Util.i18n.strings.runtimeUnknown;
     }
 
     // TODO(paulirish): revise Runtime Settings strings: https://github.com/GoogleChrome/lighthouse/pull/11796
@@ -458,6 +440,7 @@ class Util {
       deviceEmulation,
       cpuThrottling,
       networkThrottling,
+      summary,
     };
   }
 
@@ -624,22 +607,10 @@ Util.UIStrings = {
   /** Option in a dropdown menu that toggles the themeing of the report between Light(default) and Dark themes. */
   dropdownDarkTheme: 'Toggle Dark Theme',
 
-  /** Title of the Runtime settings table in a Lighthouse report.  Runtime settings are the environment configurations that a specific report used at auditing time. */
-  runtimeSettingsTitle: 'Runtime Settings',
-  /** Label for a row in a table that shows the URL that was audited during a Lighthouse run. */
-  runtimeSettingsUrl: 'URL',
-  /** Label for a row in a table that shows the time at which a Lighthouse run was conducted; formatted as a timestamp, e.g. Jan 1, 1970 12:00 AM UTC. */
-  runtimeSettingsFetchTime: 'Fetch Time',
-  /** Label for a row in a table that describes the kind of device that was emulated for the Lighthouse run.  Example values for row elements: 'No Emulation', 'Emulated Desktop', etc. */
-  runtimeSettingsDevice: 'Device',
   /** Label for a row in a table that describes the network throttling conditions that were used during a Lighthouse run, if any. */
   runtimeSettingsNetworkThrottling: 'Network throttling',
   /** Label for a row in a table that describes the CPU throttling conditions that were used during a Lighthouse run, if any.*/
   runtimeSettingsCPUThrottling: 'CPU throttling',
-  /** Label for a row in a table that shows in what tool Lighthouse is being run (e.g. The lighthouse CLI, Chrome DevTools, Lightrider, WebPageTest, etc). */
-  runtimeSettingsChannel: 'Channel',
-  /** Label for a row in a table that shows the User Agent that was detected on the Host machine that ran Lighthouse. */
-  runtimeSettingsUA: 'User agent (host)',
   /** Label for a row in a table that shows the User Agent that was used to send out all network requests during the Lighthouse run. */
   runtimeSettingsUANetwork: 'User agent (network)',
   /** Label for a row in a table that shows the estimated CPU power of the machine running Lighthouse. Example row values: 532, 1492, 783. */
@@ -658,6 +629,8 @@ Util.UIStrings = {
   runtimeDesktopEmulation: 'Emulated Desktop',
   /** Descriptive explanation for a runtime setting that is set to an unknown value. */
   runtimeUnknown: 'Unknown',
+  /** Descriptive explanation that this analysis run was from a single pageload of a browser (not a summary of hundreds of loads) */
+  runtimeSingleLoad: 'Single load',
 
   /** Descriptive explanation for environment throttling that was provided by the runtime environment instead of provided by Lighthouse throttling. */
   throttlingProvided: 'Provided by environment',
